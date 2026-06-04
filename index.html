@@ -132,17 +132,53 @@
   .hero-btn.ghost { color: var(--ink); }
   .hero-btn.ghost:hover { border-color: var(--ink-3); background: rgba(255,255,255,0.04); }
 
-  /* LOGOS */
+  /* PARTNER LOGOS MARQUEE */
   .logos-bar {
-    padding: 48px 0; border-bottom: 1px solid var(--border);
+    padding: 0; border-bottom: 1px solid var(--border);
+    overflow: hidden; position: relative;
   }
-  .logos-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 32px; flex-wrap: wrap;
+  .logos-bar::before, .logos-bar::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 100px; z-index: 2; pointer-events: none;
   }
-  .logos-row span {
-    font-size: 0.95rem; font-weight: 600; color: var(--ink-2);
-    letter-spacing: -0.01em; white-space: nowrap;
+  .logos-bar::before { left: 0; background: linear-gradient(90deg, #000 0%, transparent 100%); }
+  .logos-bar::after { right: 0; background: linear-gradient(270deg, #000 0%, transparent 100%); }
+  .logos-label {
+    text-align: center; padding: 20px 0 0;
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .logos-track {
+    display: flex; padding: 28px 0 32px;
+    /* no CSS animation — driven by JS on scroll */
+  }
+  .logos-set {
+    display: flex; align-items: center; gap: 72px;
+    flex-shrink: 0; padding-right: 72px;
+  }
+  .logo-item {
+    display: flex; align-items: center; gap: 10px;
+    white-space: nowrap; flex-shrink: 0;
+    transition: opacity 300ms;
+  }
+  .logo-item:hover { opacity: 1 !important; }
+  .logo-item img {
+    filter: grayscale(1) brightness(2);
+    opacity: 0.45;
+    transition: filter 300ms, opacity 300ms;
+  }
+  .logo-item:hover img {
+    filter: grayscale(0) brightness(1);
+    opacity: 0.9;
+  }
+  .logo-with-tag {
+    flex-direction: column; gap: 6px;
+  }
+  .logo-tag {
+    font-size: 0.58rem; font-family: var(--mono); color: var(--ink-3);
+    letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.5;
+  }
+  .logo-divider {
+    width: 1px; height: 40px; background: var(--border-2); flex-shrink: 0;
   }
 
   /* SECTIONS */
@@ -553,13 +589,37 @@
 </section>
 
 <div class="logos-bar">
-  <div class="wrap">
-    <div class="logos-row reveal">
-      <span>7,46jt pengangguran</span>
-      <span>51,5% underqualified</span>
-      <span>12 roles tersedia</span>
-      <span>5 menit analisis</span>
-      <span>Data BPS 2024</span>
+  <div class="logos-label">Didukung oleh</div>
+  <div class="logos-track">
+    <div class="logos-set">
+      <div class="logo-item"><img src="logo-bi.png" alt="Bank Indonesia" height="70"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="OJK_Logo.png" alt="OJK" height="66"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item logo-with-tag"><img src="logo dicoding.avif" alt="Dicoding Academy" height="66"><span class="logo-tag">Learning Partner</span></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo aspi.jpg" alt="ASPI" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo-fintech.webp" alt="Fintech Indonesia" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo lppi.png" alt="LPPI" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo apuvindo.svg" alt="APUVINDO" height="62"></div>
+    </div>
+    <div class="logos-set" aria-hidden="true">
+      <div class="logo-item"><img src="logo-bi.png" alt="" height="70"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="OJK_Logo.png" alt="" height="66"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item logo-with-tag"><img src="logo dicoding.avif" alt="" height="66"><span class="logo-tag">Learning Partner</span></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo aspi.jpg" alt="" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo-fintech.webp" alt="" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo lppi.png" alt="" height="62"></div>
+      <span class="logo-divider"></span>
+      <div class="logo-item"><img src="logo apuvindo.svg" alt="" height="62"></div>
     </div>
   </div>
 </div>
@@ -799,6 +859,22 @@ const io = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i%3)*50}ms`; io.observe(el); });
+
+// LOGO MARQUEE — constant slow speed
+(function() {
+  const track = document.querySelector('.logos-track');
+  if (!track) return;
+  let pos = 0;
+  const speed = 0.35;
+  function tick() {
+    pos -= speed;
+    const half = track.scrollWidth / 2;
+    if (Math.abs(pos) >= half) pos += half;
+    track.style.transform = `translateX(${pos}px)`;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 // HERO WORD ROTATOR — smooth fade, transition width and position
 const heroWords = ['data.', 'kalkulasi.', 'aksi.', 'karier.'];
