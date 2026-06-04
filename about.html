@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NaviKarier — Tentang Kami</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000;
+    --bg-2: #0a0a0a;
+    --bg-card: #0f0f0f;
+    --bg-light: #f0f0f0;
+    --ink: #fff;
+    --ink-2: #888;
+    --ink-3: #555;
+    --ink-dark: #111;
+    --accent: #3b82f6;
+    --highlight: #E11D48;
+    --border: rgba(255,255,255,0.08);
+    --border-2: rgba(255,255,255,0.14);
+    --red: #ef4444;
+    --green: #22c55e;
+    --amber: #eab308;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --max: 1400px;
+    --pad: clamp(24px, 5vw, 64px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  ::selection { background: var(--highlight); color: #fff; }
+
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
+
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: var(--max); margin: 0 auto; padding: 0 var(--pad);
+    display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.03em; }
+  .logo img { height: 24px; width: auto; object-fit: contain; }
+  .nav-links { display: flex; gap: 0; list-style: none; margin: 0; padding: 0; }
+  .nav-links li { border-left: 1px solid var(--border-2); }
+  .nav-links li:last-child { border-right: 1px solid var(--border-2); }
+  .nav-links a {
+    display: block; padding: 8px 20px; font-size: 0.88rem; color: var(--ink-2);
+    transition: color 150ms;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { display: flex; gap: 0; }
+  .nav-btn {
+    padding: 8px 20px; font-size: 0.88rem; font-weight: 500;
+    border: 1px solid var(--border-2); transition: all 150ms;
+  }
+  .nav-btn:hover { border-color: var(--ink-3); }
+  .nav-btn.filled { background: var(--ink); color: #000; border-color: var(--ink); }
+  .nav-btn.filled:hover { background: #ddd; }
+  .nav-toggle { display: none; }
+  .nav-drawer { display: none; }
+
+  @media (max-width: 880px) {
+    .nav-links, .nav-right { display: none; }
+    .nav-toggle {
+      display: flex; width: 36px; height: 36px;
+      align-items: center; justify-content: center;
+    }
+    .nav-toggle span {
+      width: 18px; height: 1.5px; background: var(--ink); position: relative;
+    }
+    .nav-toggle span::before, .nav-toggle span::after {
+      content: ""; position: absolute; width: 18px; height: 1.5px;
+      background: var(--ink); left: 0;
+    }
+    .nav-toggle span::before { top: -6px; }
+    .nav-toggle span::after { top: 6px; }
+    .nav-drawer {
+      display: none; flex-direction: column; gap: 0; padding: 0 var(--pad) 24px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--ink-2); }
+  }
+
+  /* FOOTER */
+  .footer { border-top: 1px solid var(--border); padding: 56px 0 28px; margin-top: 80px; }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 32px; margin-bottom: 40px;
+  }
+  @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+  .footer-brand .tagline { color: var(--ink-3); margin-top: 8px; font-size: 0.88rem; font-style: italic; }
+  .footer-brand .copy { color: var(--ink-3); font-size: 0.8rem; margin-top: 12px; }
+  .footer-col h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 14px; }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 0.88rem; color: var(--ink-2); transition: color 150ms; }
+  .footer-col a:hover { color: var(--ink); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 500ms, transform 500ms cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ABOUT PAGE SPECIFIC */
+  .about-hero {
+    padding: 160px 0 100px;
+    position: relative;
+    min-height: 100vh;
+  }
+  .about-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-bottom: 100px;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .about-header {
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 64px;
+    }
+  }
+  .about-headline {
+    font-size: clamp(2.5rem, 5vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin: 0;
+    max-width: 600px;
+  }
+  .about-desc-wrap {
+    padding-top: 8px;
+  }
+  .about-desc {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin: 0 0 24px;
+    max-width: 550px;
+    letter-spacing: -0.01em;
+  }
+  .about-desc b {
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .about-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-3);
+    font-size: 0.95rem;
+    transition: color 150ms;
+  }
+  .about-link:hover {
+    color: var(--ink);
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  @media (max-width: 960px) {
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .team-grid { grid-template-columns: 1fr; }
+  }
+  
+  .team-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .team-img-wrap {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background: var(--bg-card);
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 4px;
+  }
+  .team-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 400ms ease, transform 600ms cubic-bezier(.2,.7,.2,1);
+  }
+  .team-card:hover .team-img {
+    filter: grayscale(0%);
+    transform: scale(1.04);
+  }
+  .team-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .team-role {
+    font-size: 0.85rem;
+    color: var(--ink-3);
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Fitur</a></li>
+        <li><a href="index.html#demo">Demo</a></li>
+        <li><a href="index.html#dampak">Dampak</a></li>
+        <li><a href="index.html#pricing">Harga</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="about.html">Tentang Kami</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <a href="index.html#contact" class="nav-btn">Kontak</a>
+      <a href="index.html#demo" class="nav-btn filled">Mulai Gratis</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span></button>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="index.html#features">Fitur</a><a href="index.html#demo">Demo</a><a href="index.html#dampak">Dampak</a>
+    <a href="index.html#pricing">Harga</a><a href="index.html#faq">FAQ</a><a href="about.html">Tentang Kami</a><a href="index.html#contact">Kontak</a>
+  </div>
+</header>
+
+<main class="about-hero">
+  <div class="wrap">
+    <div class="about-header reveal">
+      <h1 class="about-headline">Kenali tim di balik NaviKarier</h1>
+      <div class="about-desc-wrap">
+        <p class="about-desc">
+          Kami adalah analis data, insinyur perangkat lunak, dan spesialis karier. <b>Kami percaya bahwa langkah menuju karier impian harus dipandu oleh data nyata dan hitungan presisi, bukan tebakan. Kami berdedikasi menjembatani kesenjangan kompetensi talenta Indonesia secara transparan dan matematis.</b>
+        </p>
+        <a href="index.html#contact" class="about-link">Bergabung dengan kami &rarr;</a>
+      </div>
+    </div>
+    
+    <div class="team-grid">
+      <article class="team-card reveal">
+        <div class="team-img-wrap">
+          <img src="https://placehold.co/800x800/111/444?text=Foto+1" alt="Anggota Tim 1" class="team-img" />
+        </div>
+        <h3 class="team-name">Nama Anggota 1</h3>
+        <p class="team-role">Co-founder, CEO</p>
+      </article>
+
+      <article class="team-card reveal">
+        <div class="team-img-wrap">
+          <img src="https://placehold.co/800x800/111/444?text=Foto+2" alt="Anggota Tim 2" class="team-img" />
+        </div>
+        <h3 class="team-name">Nama Anggota 2</h3>
+        <p class="team-role">Co-founder, CPO</p>
+      </article>
+
+      <article class="team-card reveal">
+        <div class="team-img-wrap">
+          <img src="https://placehold.co/800x800/111/444?text=Foto+3" alt="Anggota Tim 3" class="team-img" />
+        </div>
+        <h3 class="team-name">Nama Anggota 3</h3>
+        <p class="team-role">COO</p>
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</div>
+        <p class="tagline">Dari tebakan jadi data.</p>
+        <p class="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &mdash; BI &times; OJK.</p>
+      </div>
+      <div class="footer-col"><h5>Produk</h5><ul><li><a href="index.html#features">Fitur</a></li><li><a href="index.html#demo">Demo</a></li><li><a href="index.html#pricing">Harga</a></li></ul></div>
+      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="index.html#dampak">Dampak</a></li><li><a href="about.html">Tentang Kami</a></li><li><a href="index.html#contact">Kontak</a></li><li><a href="index.html#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privasi</a></li><li><a href="#">Ketentuan</a></li></ul></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const navToggle = document.getElementById('navToggle');
+const navDrawer = document.getElementById('navDrawer');
+navToggle.addEventListener('click', () => {
+  const open = navDrawer.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', String(open));
+});
+navDrawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  navDrawer.classList.remove('open'); navToggle.setAttribute('aria-expanded','false');
+}));
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i%3)*50}ms`; io.observe(el); });
+</script>
+</body>
+</html>

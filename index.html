@@ -19,7 +19,7 @@
     --ink-3: #555;
     --ink-dark: #111;
     --accent: #3b82f6;
-    --highlight: #ff6b6b;
+    --highlight: #E11D48;
     --border: rgba(255,255,255,0.08);
     --border-2: rgba(255,255,255,0.14);
     --red: #ef4444;
@@ -59,7 +59,8 @@
     max-width: var(--max); margin: 0 auto; padding: 0 var(--pad);
     display: flex; align-items: center; justify-content: space-between; height: 60px;
   }
-  .logo { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.03em; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.03em; }
+  .logo img { height: 24px; width: auto; object-fit: contain; }
   .nav-links { display: flex; gap: 0; list-style: none; margin: 0; padding: 0; }
   .nav-links li { border-left: 1px solid var(--border-2); }
   .nav-links li:last-child { border-right: 1px solid var(--border-2); }
@@ -160,10 +161,10 @@
 
   .sec-headline {
     font-size: clamp(2rem, 5.5vw, 3.8rem); font-weight: 800;
-    line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 24px;
+    line-height: 1.25; letter-spacing: -0.03em; margin: 0 0 24px;
     max-width: 800px;
   }
-  .hl { background: var(--highlight); color: #000; padding: 2px 6px; }
+  .hl { background: var(--highlight); color: #000; padding: 2px 6px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   .sec-light .hl { color: #fff; }
   .sec-sub {
     font-size: 1.05rem; color: var(--ink-2); max-width: 580px;
@@ -409,17 +410,28 @@
 
   /* HERO TEXT ROTATOR */
   .hero-rotator {
-    display: inline-block; position: relative; overflow: hidden;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
     vertical-align: bottom;
+    white-space: nowrap;
+    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   }
   .hero-rotator-word {
     display: inline-block;
-    background: var(--highlight); color: #fff;
-    padding: 0 12px; position: relative;
+    background: var(--highlight);
+    color: #fff;
+    padding: 0 12px;
+    position: relative;
+    white-space: nowrap;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
   }
   .hero-rotator-inner {
     display: inline-block;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    transform: translateY(0);
   }
 
   /* ANIMATED SHOWCASE CARDS */
@@ -505,7 +517,7 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="#hero" class="logo">NaviKarier</a>
+    <a href="#hero" class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</a>
     <nav>
       <ul class="nav-links">
         <li><a href="#features">Fitur</a></li>
@@ -513,6 +525,7 @@
         <li><a href="#dampak">Dampak</a></li>
         <li><a href="#pricing">Harga</a></li>
         <li><a href="#faq">FAQ</a></li>
+        <li><a href="about.html">Tentang Kami</a></li>
       </ul>
     </nav>
     <div class="nav-right">
@@ -523,7 +536,7 @@
   </div>
   <div class="nav-drawer" id="navDrawer">
     <a href="#features">Fitur</a><a href="#demo">Demo</a><a href="#dampak">Dampak</a>
-    <a href="#pricing">Harga</a><a href="#faq">FAQ</a><a href="#contact">Kontak</a>
+    <a href="#pricing">Harga</a><a href="#faq">FAQ</a><a href="about.html">Tentang Kami</a><a href="#contact">Kontak</a>
   </div>
 </header>
 
@@ -555,7 +568,6 @@
   <div class="wrap">
     <div class="split">
       <div class="reveal">
-        <div class="badge"><span class="badge-dot" style="background:var(--green)"></span> SKILL GAP ANALYZER</div>
         <h2 class="sec-headline">Hitung skill gap kamu secara matematis. Bukan tebakan, bukan <span class="hl">AI black-box.</span></h2>
       </div>
       <div class="reveal" style="padding-top:48px;">
@@ -635,7 +647,6 @@
   <div class="wrap">
     <div class="split">
       <div class="reveal">
-        <div class="badge"><span class="badge-dot" style="background:var(--accent)"></span> LIVE DEMO</div>
         <h2 class="sec-headline">Coba sendiri. Pilih role, lihat <span class="hl">gap-mu.</span></h2>
       </div>
       <div class="reveal" style="padding-top:48px;">
@@ -676,7 +687,6 @@
 <section id="dampak" class="sec sec-light">
   <div class="wrap">
     <div class="reveal" style="text-align:center;">
-      <div class="badge" style="border-color:rgba(0,0,0,0.1);color:var(--ink-dark);"><span class="badge-dot" style="background:var(--green)"></span> DAMPAK EKONOMI</div>
       <h2 class="sec-headline" style="max-width:900px;margin:0 auto 24px;">Skill gap bukan masalah personal. Ini masalah ekonomi &mdash; dan <span class="hl">ada solusinya.</span></h2>
       <p class="sec-sub" style="margin:0 auto;">Data BPS dan Bank Indonesia menunjukkan korelasi langsung antara kesiapan skill dan pertumbuhan ekonomi nasional.</p>
     </div>
@@ -722,7 +732,6 @@
 <section id="pricing" class="sec">
   <div class="wrap">
     <div class="reveal" style="text-align:center;max-width:700px;margin:0 auto 0;">
-      <div class="badge"><span class="badge-dot" style="background:var(--amber)"></span> HARGA</div>
       <h2 class="sec-headline" style="margin:0 auto 24px;">Mulai gratis. <span class="hl">Upgrade saat siap.</span></h2>
       <p class="sec-sub" style="margin:0 auto;">Tidak ada free-trial palsu yang minta kartu kredit.</p>
     </div>
@@ -762,7 +771,6 @@
 <section id="faq" class="sec">
   <div class="wrap">
     <div class="reveal">
-      <div class="badge"><span class="badge-dot" style="background:var(--ink-3)"></span> FAQ</div>
       <h2 class="sec-headline">Pertanyaan umum.</h2>
     </div>
     <div class="faq-list reveal" id="faqList">
@@ -779,7 +787,6 @@
   <div class="wrap">
     <div class="contact-grid">
       <div class="contact-info reveal">
-        <div class="badge"><span class="badge-dot" style="background:var(--accent)"></span> KONTAK</div>
         <h3>Ada pertanyaan atau ingin partnership?</h3>
         <p>Untuk demo enterprise, press, atau kolaborasi kampus &mdash; kami terbuka.</p>
         <ul class="contact-list">
@@ -804,12 +811,12 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo">NaviKarier</div>
+        <div class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</div>
         <p class="tagline">Dari tebakan jadi data.</p>
         <p class="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &mdash; BI &times; OJK.</p>
       </div>
       <div class="footer-col"><h5>Produk</h5><ul><li><a href="#features">Fitur</a></li><li><a href="#demo">Demo</a></li><li><a href="#pricing">Harga</a></li></ul></div>
-      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="#dampak">Dampak</a></li><li><a href="#contact">Kontak</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="#dampak">Dampak</a></li><li><a href="about.html">Tentang Kami</a></li><li><a href="#contact">Kontak</a></li><li><a href="#faq">FAQ</a></li></ul></div>
       <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privasi</a></li><li><a href="#">Ketentuan</a></li></ul></div>
     </div>
   </div>
@@ -831,17 +838,54 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i%3)*50}ms`; io.observe(el); });
 
-// HERO WORD ROTATOR — smooth fade, 4s per word
+// HERO WORD ROTATOR — smooth fade, transition width and position
 const heroWords = ['data.', 'kalkulasi.', 'aksi.', 'karier.'];
 const heroWordEl = document.getElementById('heroWord');
+const heroRotatorEl = document.querySelector('.hero-rotator');
 let heroIdx = 0;
+
+if (heroRotatorEl) {
+  // Set initial width explicitly to enable transition on first change
+  heroRotatorEl.style.width = heroRotatorEl.offsetWidth + 'px';
+}
+
 setInterval(() => {
+  if (!heroWordEl || !heroRotatorEl) return;
   heroIdx = (heroIdx + 1) % heroWords.length;
+
+  // 1. Fade out and slide down
   heroWordEl.style.opacity = '0';
+  heroWordEl.style.transform = 'translateY(12px)';
+
+  const oldWidth = heroRotatorEl.offsetWidth;
+
   setTimeout(() => {
+    // 2. Change text
     heroWordEl.textContent = heroWords[heroIdx];
+
+    // 3. Measure new width with auto width
+    heroRotatorEl.style.transition = 'none';
+    heroRotatorEl.style.width = 'auto';
+    const newWidth = heroRotatorEl.offsetWidth;
+
+    // 4. Force reflow and set back to old width
+    heroRotatorEl.style.width = oldWidth + 'px';
+    heroRotatorEl.offsetHeight; // force layout reflow
+
+    // 5. Apply smooth width transition and target width
+    heroRotatorEl.style.transition = 'width 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+    heroRotatorEl.style.width = newWidth + 'px';
+
+    // 6. Set slide-in start position (above)
+    heroWordEl.style.transition = 'none';
+    heroWordEl.style.transform = 'translateY(-12px)';
+    heroWordEl.offsetHeight; // force layout reflow
+
+    // 7. Transition opacity and slide back into place
+    heroWordEl.style.transition = 'opacity 0.25s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)';
     heroWordEl.style.opacity = '1';
-  }, 400);
+    heroWordEl.style.transform = 'translateY(0)';
+  }, 250);
 }, 4000);
 
 // GAUGE — smooth slow update every 3s
