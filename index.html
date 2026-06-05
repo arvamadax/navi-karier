@@ -229,7 +229,7 @@
   .features-row {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-top: 80px;
   }
-  @media (max-width: 960px) { .features-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 960px) { .features-row { grid-template-columns: repeat(2, 1fr); } .dampak-stats { grid-template-columns: 1fr !important; } }
   @media (max-width: 560px) { .features-row { grid-template-columns: 1fr; } }
   .feat-icon {
     width: 80px; height: 80px; margin-bottom: 24px;
@@ -553,7 +553,7 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="#hero" class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</a>
+    <a href="#hero" class="logo"><img src="assets/logonavi.png" alt="NaviKarier Logo" />NaviKarier</a>
     <nav>
       <ul class="nav-links">
         <li><a href="#features">Fitur</a></li>
@@ -562,6 +562,7 @@
         <li><a href="pricing.html">Harga</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="about.html">Tentang Kami</a></li>
+        <li><a href="/blog">Blog</a></li>
       </ul>
     </nav>
     <div class="nav-right">
@@ -572,7 +573,7 @@
   </div>
   <div class="nav-drawer" id="navDrawer">
     <a href="#features">Fitur</a><a href="#demo">Demo</a><a href="#dampak">Dampak</a>
-    <a href="pricing.html">Harga</a><a href="#faq">FAQ</a><a href="about.html">Tentang Kami</a><a href="#contact">Kontak</a>
+    <a href="pricing.html">Harga</a><a href="#faq">FAQ</a><a href="about.html">Tentang Kami</a><a href="/blog">Blog</a><a href="#contact">Kontak</a>
   </div>
 </header>
 
@@ -592,34 +593,34 @@
   <div class="logos-label">Didukung oleh</div>
   <div class="logos-track">
     <div class="logos-set">
-      <div class="logo-item"><img src="logo-bi.png" alt="Bank Indonesia" height="70"></div>
+      <div class="logo-item"><img src="assets/logo-bi.png" alt="Bank Indonesia" height="70"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="OJK_Logo.png" alt="OJK" height="66"></div>
+      <div class="logo-item"><img src="assets/OJK_Logo.png" alt="OJK" height="66"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item logo-with-tag"><img src="logo dicoding.avif" alt="Dicoding Academy" height="66"><span class="logo-tag">Learning Partner</span></div>
+      <div class="logo-item logo-with-tag"><img src="assets/logo dicoding.avif" alt="Dicoding Academy" height="66"><span class="logo-tag">Learning Partner</span></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo aspi.jpg" alt="ASPI" height="62"></div>
+      <div class="logo-item"><img src="assets/logo aspi.jpg" alt="ASPI" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo-fintech.webp" alt="Fintech Indonesia" height="62"></div>
+      <div class="logo-item"><img src="assets/logo-fintech.webp" alt="Fintech Indonesia" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo lppi.png" alt="LPPI" height="62"></div>
+      <div class="logo-item"><img src="assets/logo lppi.png" alt="LPPI" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo apuvindo.svg" alt="APUVINDO" height="62"></div>
+      <div class="logo-item"><img src="assets/logo apuvindo.svg" alt="APUVINDO" height="62"></div>
     </div>
     <div class="logos-set" aria-hidden="true">
-      <div class="logo-item"><img src="logo-bi.png" alt="" height="70"></div>
+      <div class="logo-item"><img src="assets/logo-bi.png" alt="" height="70"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="OJK_Logo.png" alt="" height="66"></div>
+      <div class="logo-item"><img src="assets/OJK_Logo.png" alt="" height="66"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item logo-with-tag"><img src="logo dicoding.avif" alt="" height="66"><span class="logo-tag">Learning Partner</span></div>
+      <div class="logo-item logo-with-tag"><img src="assets/logo dicoding.avif" alt="" height="66"><span class="logo-tag">Learning Partner</span></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo aspi.jpg" alt="" height="62"></div>
+      <div class="logo-item"><img src="assets/logo aspi.jpg" alt="" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo-fintech.webp" alt="" height="62"></div>
+      <div class="logo-item"><img src="assets/logo-fintech.webp" alt="" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo lppi.png" alt="" height="62"></div>
+      <div class="logo-item"><img src="assets/logo lppi.png" alt="" height="62"></div>
       <span class="logo-divider"></span>
-      <div class="logo-item"><img src="logo apuvindo.svg" alt="" height="62"></div>
+      <div class="logo-item"><img src="assets/logo apuvindo.svg" alt="" height="62"></div>
     </div>
   </div>
 </div>
@@ -744,46 +745,48 @@
   </div>
 </section>
 
-<section id="dampak" class="sec sec-light">
+<section id="dampak" class="sec">
   <div class="wrap">
-    <div class="reveal" style="text-align:center;">
-      <h2 class="sec-headline" style="max-width:900px;margin:0 auto 24px;">Skill gap bukan masalah personal. Ini masalah ekonomi &mdash; dan <span class="hl">ada solusinya.</span></h2>
-      <p class="sec-sub" style="margin:0 auto;">Data BPS dan Bank Indonesia menunjukkan korelasi langsung antara kesiapan skill dan pertumbuhan ekonomi nasional.</p>
-    </div>
-    <div class="features-row reveal">
-      <div class="feat">
-        <div class="feat-icon">&#x2693;</div>
-        <h4>7,46 juta pengangguran</h4>
-        <p>Mayoritas karena mismatch skill vs kebutuhan industri (BPS, Feb 2024).</p>
+    <div class="split reveal">
+      <div>
+        <h2 class="sec-headline">Indonesia kehilangan <span class="hl">Rp 142T</span> per tahun karena skill gap.</h2>
       </div>
-      <div class="feat">
-        <div class="feat-icon">&#x26A0;</div>
-        <h4>51,5% underqualified</h4>
-        <p>Pelamar tidak memenuhi kualifikasi minimum posisi yang dilamar.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">&#x274C;</div>
-        <h4>Rp 142T PDB hilang</h4>
-        <p>Estimasi kerugian ekonomi tahunan akibat produktivitas tidak optimal.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">&#x2705;</div>
-        <h4>Solusi: upskilling terarah</h4>
-        <p>Identifikasi gap &rarr; belajar tepat sasaran &rarr; employability naik.</p>
+      <div style="padding-top:48px;">
+        <p class="sec-sub">Bukan soal kurang lowongan. Masalahnya: skill pelamar tidak match dengan kebutuhan industri. Data BPS dan Bank Indonesia membuktikannya.</p>
       </div>
     </div>
-    <div class="impact-flow-wrap reveal" style="border-color:rgba(0,0,0,0.1);background:rgba(0,0,0,0.03);">
-      <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#555;text-align:center;">Logika Dampak &mdash; Mandat BI &amp; OJK</div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:64px;" class="reveal dampak-stats">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(2rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.02em;line-height:1;">7,46<span style="font-size:0.5em;color:var(--ink-2);font-weight:400;margin-left:4px;">juta</span></div>
+        <div style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:12px;">Pengangguran</div>
+        <p style="color:var(--ink-2);font-size:0.85rem;margin:12px 0 0;line-height:1.5;">Mayoritas karena mismatch skill vs kebutuhan industri.</p>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink-3);margin-top:12px;letter-spacing:0.06em;">BPS, Feb 2024</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(2rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--red);">51,5<span style="font-size:0.5em;color:var(--ink-2);font-weight:400;margin-left:2px;">%</span></div>
+        <div style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:12px;">Underqualified</div>
+        <p style="color:var(--ink-2);font-size:0.85rem;margin:12px 0 0;line-height:1.5;">Pelamar tidak memenuhi kualifikasi minimum posisi yang dilamar.</p>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink-3);margin-top:12px;letter-spacing:0.06em;">Analisis Job Listing</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(2rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--amber);">142<span style="font-size:0.5em;color:var(--ink-2);font-weight:400;margin-left:4px;">T</span></div>
+        <div style="font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:12px;">PDB Hilang / Tahun</div>
+        <p style="color:var(--ink-2);font-size:0.85rem;margin:12px 0 0;line-height:1.5;">Kerugian ekonomi akibat produktivitas tidak optimal.</p>
+        <div style="font-family:var(--mono);font-size:0.62rem;color:var(--ink-3);margin-top:12px;letter-spacing:0.06em;">Estimasi Bank Indonesia</div>
+      </div>
+    </div>
+
+    <div class="impact-flow-wrap reveal" style="margin-top:24px;">
+      <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);text-align:center;">Bagaimana NaviKarier Mengatasinya</div>
       <div class="impact-flow">
-        <span class="impact-flow-item active" style="border-color:var(--highlight);">Identifikasi Gap</span>
+        <span class="impact-flow-item active">Ukur Skill Gap</span>
         <span class="impact-flow-arrow">&rarr;</span>
-        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Upskilling Terarah</span>
-        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
-        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Employability Naik</span>
-        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
-        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Pendapatan Meningkat</span>
-        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
-        <span class="impact-flow-item active" style="border-color:var(--highlight);">Literasi Keuangan</span>
+        <span class="impact-flow-item">Temukan Prioritas</span>
+        <span class="impact-flow-arrow">&rarr;</span>
+        <span class="impact-flow-item">Belajar Terarah</span>
+        <span class="impact-flow-arrow">&rarr;</span>
+        <span class="impact-flow-item active">Siap Bersaing</span>
       </div>
     </div>
   </div>
@@ -833,12 +836,12 @@
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo"><img src="logonavi.png" alt="NaviKarier Logo" />NaviKarier</div>
+        <div class="logo"><img src="assets/logonavi.png" alt="NaviKarier Logo" />NaviKarier</div>
         <p class="tagline">Dari tebakan jadi data.</p>
         <p class="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &mdash; BI &times; OJK.</p>
       </div>
       <div class="footer-col"><h5>Produk</h5><ul><li><a href="#features">Fitur</a></li><li><a href="#demo">Demo</a></li><li><a href="pricing.html">Harga</a></li></ul></div>
-      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="#dampak">Dampak</a></li><li><a href="about.html">Tentang Kami</a></li><li><a href="#contact">Kontak</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="#dampak">Dampak</a></li><li><a href="about.html">Tentang Kami</a></li><li><a href="/blog">Blog</a></li><li><a href="#contact">Kontak</a></li><li><a href="#faq">FAQ</a></li></ul></div>
       <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privasi</a></li><li><a href="#">Ketentuan</a></li></ul></div>
     </div>
   </div>
