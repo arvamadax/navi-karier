@@ -5,9 +5,9 @@ import Reveal from '../components/Reveal';
 export const metadata: Metadata = { title: 'NaviKarier — Tentang Kami' };
 
 const team = [
-  { name: 'Nama Anggota 1', role: 'Co-founder, CEO', img: 'https://placehold.co/800x800/111/444?text=Foto+1' },
-  { name: 'Nama Anggota 2', role: 'Co-founder, CPO', img: 'https://placehold.co/800x800/111/444?text=Foto+2' },
-  { name: 'Nama Anggota 3', role: 'COO', img: 'https://placehold.co/800x800/111/444?text=Foto+3' },
+  { name: 'Arva Mada Jayastu', role: 'Project Lead, Frontend Developer', img: '/assets/team-arva.jpg' },
+  { name: 'Farrel Arzaqia Mecca', role: 'Backend Developer, AI Integration', img: 'https://placehold.co/800x800/111/444?text=Foto+2' },
+  { name: 'Fairuz Zata Amani', role: 'Business Analyst, Documentation', img: '/assets/team-fairuz.jpg' },
 ];
 
 export default function AboutPage() {

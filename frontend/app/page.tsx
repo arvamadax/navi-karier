@@ -106,6 +106,13 @@ export default function HomePage() {
               </a>
             </div>
           </Reveal>
+          <Reveal>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
+              <Link href="/blog" className="hero-btn primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                Baca Selengkapnya di Blog &rarr;
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
 
