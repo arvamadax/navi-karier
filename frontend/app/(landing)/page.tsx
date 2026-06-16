@@ -24,7 +24,7 @@ export default function HomePage() {
           </Reveal>
           <Reveal>
             <div className="hero-ctas">
-              <Link href="#demo" className="hero-btn primary">Analisa Sekarang</Link>
+              <Link href="/register" className="hero-btn primary">Analisa Sekarang</Link>
               <Link href="#features" className="hero-btn ghost">Pelajari Lebih &rarr;</Link>
             </div>
           </Reveal>
@@ -37,18 +37,14 @@ export default function HomePage() {
       {/* FEATURES */}
       <section id="features" className="sec">
         <div className="wrap">
-          <div className="split">
-            <Reveal>
-              <h2 className="sec-headline">
-                Hitung skill gap kamu secara matematis. Bukan tebakan, bukan <span className="hl">AI black-box.</span>
-              </h2>
-            </Reveal>
-            <Reveal style={{ paddingTop: 48 }}>
-              <p className="sec-sub">
-                Upload CV atau input skill manual. Sistem menghitung gap vs standar industri menggunakan taxonomy yang dikurasi dari ribuan job listing Indonesia.
-              </p>
-            </Reveal>
-          </div>
+          <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
+            <h2 className="sec-headline">
+              Hitung skill gap kamu secara matematis. Bukan tebakan, bukan <span className="hl">AI black-box.</span>
+            </h2>
+            <p className="sec-sub" style={{ marginTop: 24 }}>
+              Upload CV atau input skill manual. Sistem menghitung gap vs standar industri menggunakan taxonomy yang dikurasi dari ribuan job listing Indonesia.
+            </p>
+          </Reveal>
           <Reveal>
             <ShowcaseCards />
           </Reveal>
@@ -58,14 +54,10 @@ export default function HomePage() {
       {/* DEMO */}
       <section id="demo" className="sec">
         <div className="wrap">
-          <div className="split">
-            <Reveal>
-              <h2 className="sec-headline">Coba sendiri. Pilih role, lihat <span className="hl">gap-mu.</span></h2>
-            </Reveal>
-            <Reveal style={{ paddingTop: 48 }}>
-              <p className="sec-sub">100% berjalan di browser. Tidak ada data yang dikirim ke server manapun.</p>
-            </Reveal>
-          </div>
+          <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
+            <h2 className="sec-headline">Coba sendiri. Pilih role, lihat <span className="hl">gap-mu.</span></h2>
+            <p className="sec-sub" style={{ marginTop: 24 }}>100% berjalan di browser. Tidak ada data yang dikirim ke server manapun.</p>
+          </Reveal>
           <Reveal>
             <DemoWidget />
           </Reveal>
@@ -75,14 +67,10 @@ export default function HomePage() {
       {/* DAMPAK */}
       <section id="dampak" className="sec">
         <div className="wrap">
-          <div className="split">
-            <Reveal>
-              <h2 className="sec-headline">Indonesia kehilangan <span className="hl">Rp 142T</span> per tahun karena skill gap.</h2>
-            </Reveal>
-            <Reveal style={{ paddingTop: 48 }}>
-              <p className="sec-sub">Bukan soal kurang lowongan. Masalahnya: skill pelamar tidak match dengan kebutuhan industri. Data BPS dan Bank Indonesia membuktikannya.</p>
-            </Reveal>
-          </div>
+          <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
+            <h2 className="sec-headline">Indonesia kehilangan <span className="hl">Rp 142T</span> per tahun karena skill gap.</h2>
+            <p className="sec-sub" style={{ marginTop: 24 }}>Bukan soal kurang lowongan. Masalahnya: skill pelamar tidak match dengan kebutuhan industri. Data BPS dan Bank Indonesia membuktikannya.</p>
+          </Reveal>
 
           <Reveal>
             <div className="dampak-stats">
@@ -207,8 +195,8 @@ export default function HomePage() {
             <h2 className="sec-headline" style={{ margin: '0 auto 24px', textAlign: 'center', maxWidth: 700 }}>Siap tahu posisi skill kamu <span className="hl">sebenarnya?</span></h2>
             <p className="sec-sub" style={{ textAlign: 'center', margin: '0 auto 40px' }}>5 menit. Tanpa signup. Langsung lihat gap kamu vs standar industri.</p>
             <div style={{ display: 'flex', gap: 0, justifyContent: 'center' }}>
-              <Link href="#demo" className="hero-btn primary">Analisa Sekarang</Link>
-              <Link href="/faq" className="hero-btn ghost">Lihat FAQ &rarr;</Link>
+              <Link href="/register" className="hero-btn primary">Mulai Gratis</Link>
+              <Link href="/login" className="hero-btn ghost">Masuk &rarr;</Link>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 48 }}>
               <Link href="/contact" style={{ fontSize: '0.88rem', color: 'var(--ink-2)', borderBottom: '1px solid var(--border-2)', paddingBottom: 2, transition: 'color 150ms' }}>Hubungi Kami</Link>
