@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRef } from 'react';
-import Reveal from '../components/Reveal';
+import Reveal from '../../components/Reveal';
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const itemRef = useRef<HTMLDivElement>(null);

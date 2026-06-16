@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import HeroRotator from './components/HeroRotator';
-import LogoMarquee from './components/LogoMarquee';
-import ShowcaseCards from './components/ShowcaseCards';
-import DemoWidget from './components/DemoWidget';
-import Reveal from './components/Reveal';
+import HeroRotator from '../components/HeroRotator';
+import LogoMarquee from '../components/LogoMarquee';
+import ShowcaseCards from '../components/ShowcaseCards';
+import DemoWidget from '../components/DemoWidget';
+import Reveal from '../components/Reveal';
 
 export default function HomePage() {
   return (

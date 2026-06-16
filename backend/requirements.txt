@@ -5,3 +5,7 @@ langchain
 sqlalchemy
 pydantic
 python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
+python-dotenv
+bcrypt

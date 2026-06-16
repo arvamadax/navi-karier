@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import Reveal from '../components/Reveal';
+import Reveal from '../../components/Reveal';
 
 export default function ContactPage() {
   const formRef = useRef<HTMLFormElement>(null);

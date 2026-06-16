@@ -1,27 +1,63 @@
-from fastapi import APIRouter, UploadFile, File, Depends, Form
+from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
+from ..auth import get_current_user
+from ..schemas import UserRegister, UserLogin, AnalyzeRequest
+from .. import models
 from . import controllers
 
 router = APIRouter()
 
-@router.post("/upload-cv")
-def upload_cv(file: UploadFile = File(...), user_id: int = Form(...), db: Session = Depends(get_db)):
-    return controllers.process_cv_upload(file, db, user_id)
+# --- Auth ---
+@router.post("/auth/register")
+def register(payload: UserRegister, db: Session = Depends(get_db)):
+    return controllers.register_user(payload, db)
 
+@router.post("/auth/login")
+def login(payload: UserLogin, db: Session = Depends(get_db)):
+    return controllers.login_user(payload, db)
+
+@router.get("/auth/me")
+def me(user: models.User = Depends(get_current_user)):
+    return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
+
+# --- CV Upload ---
+@router.post("/upload-cv")
+def upload_cv(
+    file: UploadFile = File(...),
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.process_cv_upload(file, db, user.id)
+
+# --- Gap Analysis ---
 @router.post("/analyze-gap")
-def analyze_gap(cv_id: int = Form(...), target_role: str = Form(...), user_id: int = Form(...), db: Session = Depends(get_db)):
-    return controllers.calculate_gap(cv_id, target_role, db, user_id)
+def analyze_gap(
+    payload: AnalyzeRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.calculate_gap(payload.cv_id, payload.target_role, payload.level, db, user.id)
 
 @router.get("/recommendations/{analysis_id}")
-def get_recommendations(analysis_id: int, db: Session = Depends(get_db)):
-    from .. import models
-    analysis = db.query(models.AnalysisResult).filter(models.AnalysisResult.id == analysis_id).first()
-    if not analysis:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    return {
-        "match_score": analysis.match_score,
-        "missing_skills": analysis.missing_skills.split(","),
-        "recommended_courses": analysis.recommended_courses.split(",")
-    }
+def get_recommendations(
+    analysis_id: int,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.get_analysis(analysis_id, user.id, db)
+
+# --- Dashboard ---
+@router.get("/dashboard/overview")
+def dashboard_overview(
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.get_dashboard_overview(user.id, db)
+
+@router.get("/dashboard/history")
+def analysis_history(
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.get_analysis_history(user.id, db)

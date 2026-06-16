@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
+import SessionProvider from './lib/session-provider';
 import './globals.css';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 
 export const metadata: Metadata = {
   title: 'NaviKarier — Dari tebakan jadi data.',
@@ -21,9 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );
