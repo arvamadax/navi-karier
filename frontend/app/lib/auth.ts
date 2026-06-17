@@ -5,6 +5,7 @@ import type { UserRole } from './constants';
 import { apiFetch, type LoginResponse } from './api';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'navikarier-dev-secret-key',
   pages: {
     signIn: '/login',
     newUser: '/register',
