@@ -1,8 +1,10 @@
 fastapi
 uvicorn
 PyPDF2
-langchain
+anthropic
 sqlalchemy
+alembic
+psycopg2-binary
 pydantic
 python-multipart
 passlib[bcrypt]

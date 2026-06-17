@@ -7,7 +7,23 @@ import type { AnalysisResult } from '../../../lib/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-const TARGET_ROLES = ['Software Engineer', 'Data Analyst', 'Product Manager'];
+const POPULAR_ROLES = [
+  'Software Engineer',
+  'Data Analyst',
+  'Product Manager',
+  'UI/UX Designer',
+  'DevOps Engineer',
+  'Business Analyst',
+  'Digital Marketing Specialist',
+  'Fullstack Developer',
+  'Data Scientist',
+  'Mobile Developer',
+  'Backend Engineer',
+  'Frontend Developer',
+  'Quality Assurance Engineer',
+  'Cybersecurity Analyst',
+  'Cloud Engineer',
+];
 const LEVELS = ['JUNIOR', 'MID', 'SENIOR'];
 
 export default function AnalyzePage() {
@@ -17,7 +33,7 @@ export default function AnalyzePage() {
 
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [targetRole, setTargetRole] = useState(TARGET_ROLES[0]);
+  const [targetRole, setTargetRole] = useState(POPULAR_ROLES[0]);
   const [level, setLevel] = useState('MID');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -132,17 +148,20 @@ export default function AnalyzePage() {
             </div>
             <div className="field">
               <label htmlFor="target-role">Posisi yang kamu tuju</label>
-              <select
+              <input
                 id="target-role"
+                list="role-options"
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value)}
+                placeholder="Pilih atau ketik role..."
                 style={{
                   font: 'inherit', fontSize: '0.88rem', background: 'rgba(255,255,255,0.04)',
                   border: '1px solid var(--border-2)', padding: '10px 12px', color: 'var(--ink)', width: '100%',
                 }}
-              >
-                {TARGET_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
+              />
+              <datalist id="role-options">
+                {POPULAR_ROLES.map((r) => <option key={r} value={r} />)}
+              </datalist>
             </div>
             <div className="field" style={{ marginTop: 14 }}>
               <label>Level</label>
@@ -241,12 +260,15 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          <div className="dash-actions-row" style={{ gap: 8 }}>
-            <button onClick={() => { setResult(null); setFile(null); }} className="dash-action-btn">
-              New Analysis
+          <div className="dash-actions-row" style={{ gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => router.push(`/dashboard/gap?id=${result.analysis_id}`)} className="dash-action-btn dash-action-primary">
+              Lihat Detail Gap →
             </button>
-            <button onClick={() => router.push('/dashboard')} className="dash-action-btn dash-action-primary">
-              Back to Dashboard
+            <button onClick={() => router.push(`/dashboard/roadmap?id=${result.analysis_id}`)} className="dash-action-btn dash-action-primary">
+              Lihat Roadmap →
+            </button>
+            <button onClick={() => { setResult(null); setFile(null); }} className="dash-action-btn">
+              Analisis Baru
             </button>
           </div>
         </>

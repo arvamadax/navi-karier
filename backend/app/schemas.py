@@ -25,6 +25,17 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user: UserResponse
 
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    target_role: Optional[str] = None
+    experience_level: Optional[str] = None
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+
 class AnalyzeRequest(BaseModel):
     cv_id: int
     target_role: str

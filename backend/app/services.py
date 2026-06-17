@@ -1,5 +1,9 @@
+import os
+import logging
 import PyPDF2
 from typing import Dict, Any
+
+logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf(file_stream) -> str:
@@ -110,7 +114,7 @@ def _simulate_cv_scores(cv_text: str, skills: list) -> list:
     return results
 
 
-def analyze_gap_with_llm(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
+def _analyze_gap_hardcoded(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
     role_skills = ROLE_SKILL_MAP.get(target_role, ROLE_SKILL_MAP.get("Software Engineer"))
     level_upper = level.upper()
     skills_required = role_skills.get(level_upper, role_skills.get("MID"))
@@ -133,3 +137,14 @@ def analyze_gap_with_llm(cv_text: str, target_role: str, level: str = "MID") -> 
         "missing_skills": missing,
         "recommended_courses": courses[:8],
     }
+
+
+def analyze_gap_with_llm(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
+    if os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            from .ai_service import analyze_cv_with_claude
+            return analyze_cv_with_claude(cv_text, target_role, level)
+        except Exception as e:
+            logger.warning("AI analysis failed, falling back to hardcoded: %s", e)
+
+    return _analyze_gap_hardcoded(cv_text, target_role, level)

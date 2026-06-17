@@ -80,7 +80,7 @@ export default function DashboardOverviewPage() {
         <div className="dash-card">
           <div className="dash-card-header">
             <h3>Top Skill Gaps</h3>
-            <Link href="/dashboard/gap" className="dash-see-all">View All →</Link>
+            <Link href={recentAnalyses[0] ? `/dashboard/gap?id=${recentAnalyses[0].id}` : '/dashboard/analyze'} className="dash-see-all">View All →</Link>
           </div>
           {topGaps.length > 0 ? (
             <div className="dash-skill-list">
@@ -140,7 +140,7 @@ export default function DashboardOverviewPage() {
             </div>
             {recentAnalyses.length > 0 ? (
               recentAnalyses.map((a) => (
-                <div key={a.id} className="dash-analysis-row">
+                <Link key={a.id} href={`/dashboard/gap?id=${a.id}`} className="dash-analysis-row" style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div>
                     <div className="dash-analysis-role">{a.target_role}</div>
                     <div className="dash-analysis-date">
@@ -148,7 +148,7 @@ export default function DashboardOverviewPage() {
                     </div>
                   </div>
                   <span className={`dash-tag dash-tag-${scoreTag(a.match_score)}`}>{a.match_score}%</span>
-                </div>
+                </Link>
               ))
             ) : (
               <p style={{ color: 'var(--ink-3)', fontSize: '0.82rem', padding: '16px 0', textAlign: 'center' }}>
@@ -167,7 +167,7 @@ export default function DashboardOverviewPage() {
           <Link href="/dashboard/analyze" className="dash-action-btn dash-action-primary">
             + New Analysis
           </Link>
-          <Link href="/dashboard/roadmap" className="dash-action-btn">
+          <Link href={recentAnalyses[0] ? `/dashboard/roadmap?id=${recentAnalyses[0].id}` : '/dashboard/analyze'} className="dash-action-btn">
             View Roadmap
           </Link>
           <Link href="/dashboard/progress" className="dash-action-btn">

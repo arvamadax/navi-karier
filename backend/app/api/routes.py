@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_user
-from ..schemas import UserRegister, UserLogin, AnalyzeRequest
+from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange
 from .. import models
 from . import controllers
 
@@ -19,7 +19,27 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
 
 @router.get("/auth/me")
 def me(user: models.User = Depends(get_current_user)):
-    return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
+    return {
+        "id": user.id, "name": user.name, "email": user.email, "role": user.role,
+        "phone": user.phone, "bio": user.bio,
+        "target_role": user.target_role, "experience_level": user.experience_level,
+    }
+
+@router.put("/auth/profile")
+def update_profile(
+    payload: ProfileUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.update_profile(payload, user, db)
+
+@router.put("/auth/password")
+def change_password(
+    payload: PasswordChange,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return controllers.change_password(payload, user, db)
 
 # --- CV Upload ---
 @router.post("/upload-cv")

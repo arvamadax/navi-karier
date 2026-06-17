@@ -11,6 +11,10 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password_hash = Column(String)
     role = Column(String, default="JOBSEEKER")
+    phone = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
+    target_role = Column(String, nullable=True)
+    experience_level = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     cv_data = relationship("CVData", back_populates="owner")
