@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut } from 'lucide-react';
@@ -32,8 +33,8 @@ export default function Sidebar() {
     <aside className="dash-sidebar">
       <div className="dash-sidebar-logo">
         <Link href="/" className="dash-logo-link">
-          <span className="dash-logo-dot" />
-          NaviKarier
+          <Image src="/assets/logonavi.png" alt="NaviKarier Logo" width={24} height={24} />
+          <span>NaviKarier</span>
         </Link>
       </div>
 
