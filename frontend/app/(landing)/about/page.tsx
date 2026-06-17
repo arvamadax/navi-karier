@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'NaviKarier — Tentang Kami' };
 
 const team = [
   { name: 'Arva Mada Jayastu', role: 'Project Lead, Frontend Developer', img: '/assets/team-arva.jpg' },
-  { name: 'Farrel Arzaqia Mecca', role: 'Backend Developer, AI Integration', img: 'https://placehold.co/800x800/111/444?text=Foto+2' },
+  { name: 'Farrel Arzaqia Mecca', role: 'Backend Developer, AI Integration', img: '/assets/team-farrel.jpg' },
   { name: 'Fairuz Zata Amani', role: 'Business Analyst, Documentation', img: '/assets/team-fairuz.jpg' },
 ];
 
