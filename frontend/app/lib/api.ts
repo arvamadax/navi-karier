@@ -2,15 +2,19 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
 export async function apiFetch<T = unknown>(
   path: string,
-  options: RequestInit & { token?: string } = {},
+  options: Omit<RequestInit, 'body'> & { token?: string; body?: BodyInit | Record<string, unknown> | null } = {},
 ): Promise<T> {
-  const { token, headers, ...rest } = options;
+  const { token, headers, body, ...rest } = options;
+  const serializedBody = body && typeof body === 'object' && !(body instanceof Blob) && !(body instanceof FormData) && !(body instanceof URLSearchParams) && !(body instanceof ArrayBuffer)
+    ? JSON.stringify(body)
+    : body as BodyInit | null | undefined;
   const res = await fetch(`${API_BASE}/api${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(headers as Record<string, string>),
     },
+    body: serializedBody,
     ...rest,
   });
 
@@ -74,4 +78,15 @@ export type AnalysisResult = {
   skills: SkillGap[];
   missing_skills: string[];
   recommended_courses: string[];
+};
+
+export type RecommendationDetail = {
+  id: number;
+  match_score: number;
+  target_role: string;
+  level: string;
+  skills: SkillGap[];
+  missing_skills: string[];
+  recommended_courses: string[];
+  created_at: string | null;
 };

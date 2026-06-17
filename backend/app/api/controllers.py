@@ -3,7 +3,7 @@ from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from .. import services, models
 from ..auth import hash_password, verify_password, create_access_token
-from ..schemas import UserRegister, UserLogin
+from ..schemas import UserRegister, UserLogin, ProfileUpdate, PasswordChange
 
 
 def register_user(payload: UserRegister, db: Session):
@@ -175,3 +175,36 @@ def get_analysis_history(user_id: int, db: Session):
         }
         for a in analyses
     ]
+
+
+def update_profile(payload: ProfileUpdate, user: models.User, db: Session):
+    update_data = payload.model_dump(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "phone": user.phone,
+        "bio": user.bio,
+        "target_role": user.target_role,
+        "experience_level": user.experience_level,
+    }
+
+
+def change_password(payload: PasswordChange, user: models.User, db: Session):
+    if not verify_password(payload.old_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Password lama salah")
+
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+
+    return {"message": "Password berhasil diubah"}
