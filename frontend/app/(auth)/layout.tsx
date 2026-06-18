@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,13 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           marginBottom: 48,
         }}
       >
-        <span style={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: '#E11D48',
-          display: 'inline-block',
-        }} />
+        <Image src="/assets/logonavi.png" alt="NaviKarier Logo" width={24} height={24} />
         NaviKarier
       </Link>
       {children}
