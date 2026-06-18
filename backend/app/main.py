@@ -1,11 +1,11 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from .database import engine, Base
-from .api.routes import router as api_router
-import os
+from fastapi import FastAPI  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from .database import engine, Base  # noqa: E402
+from .api.routes import router as api_router  # noqa: E402
+import os  # noqa: E402
 
 Base.metadata.create_all(bind=engine)
 

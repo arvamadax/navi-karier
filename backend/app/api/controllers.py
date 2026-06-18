@@ -264,7 +264,7 @@ def handle_contact(payload: ContactRequest):
     resend_mod.api_key = resend_api_key
     try:
         resend_mod.Emails.send({
-            "from": f"NaviKarier Contact <noreply@navikarier.com>",
+            "from": "NaviKarier Contact <noreply@navikarier.com>",
             "to": [target_email],
             "subject": f"[Contact - {payload.type}] dari {payload.name}",
             "html": f"""
