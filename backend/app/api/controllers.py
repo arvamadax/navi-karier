@@ -1,9 +1,13 @@
 import json
+import os
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from .. import services, models
-from ..auth import hash_password, verify_password, create_access_token
-from ..schemas import UserRegister, UserLogin, ProfileUpdate, PasswordChange
+from datetime import datetime, timedelta, timezone
+from jose import JWTError, jwt as jose_jwt
+from ..auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from ..schemas import UserRegister, UserLogin, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
+from ..email_service import send_reset_password_email
 
 
 def register_user(payload: UserRegister, db: Session):
@@ -208,3 +212,70 @@ def change_password(payload: PasswordChange, user: models.User, db: Session):
     db.commit()
 
     return {"message": "Password berhasil diubah"}
+
+
+def forgot_password(payload: ForgotPasswordRequest, db: Session):
+    user = db.query(models.User).filter(models.User.email == payload.email).first()
+    if not user:
+        return {"message": "Jika email terdaftar, link reset password akan dikirim"}
+
+    reset_token = jose_jwt.encode(
+        {
+            "sub": str(user.id),
+            "purpose": "reset_password",
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
+    send_reset_password_email(user.email, reset_token, user.name)
+    return {"message": "Jika email terdaftar, link reset password akan dikirim"}
+
+
+def reset_password(payload: ResetPasswordRequest, db: Session):
+    try:
+        token_data = jose_jwt.decode(payload.token, SECRET_KEY, algorithms=[ALGORITHM])
+        if token_data.get("purpose") != "reset_password":
+            raise HTTPException(status_code=400, detail="Token tidak valid")
+        user_id = token_data.get("sub")
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Token tidak valid atau sudah kedaluwarsa")
+
+    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Token tidak valid")
+
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+
+    return {"message": "Password berhasil direset. Silakan login dengan password baru."}
+
+
+def handle_contact(payload: ContactRequest):
+    import resend as resend_mod
+    resend_api_key = os.environ.get("RESEND_API_KEY", "")
+    target_email = os.environ.get("CONTACT_EMAIL", "hello@navikarier.id")
+
+    if not resend_api_key:
+        print(f"[DEV] Contact form: {payload.name} <{payload.email}> [{payload.type}]: {payload.message}")
+        return {"message": "Pesan berhasil dikirim"}
+
+    resend_mod.api_key = resend_api_key
+    try:
+        resend_mod.Emails.send({
+            "from": f"NaviKarier Contact <noreply@navikarier.com>",
+            "to": [target_email],
+            "subject": f"[Contact - {payload.type}] dari {payload.name}",
+            "html": f"""
+            <p><strong>Dari:</strong> {payload.name} ({payload.email})</p>
+            <p><strong>Tipe:</strong> {payload.type}</p>
+            <hr>
+            <p>{payload.message}</p>
+            """,
+            "reply_to": payload.email,
+        })
+    except Exception as e:
+        print(f"[EMAIL ERROR] Contact form failed: {e}")
+
+    return {"message": "Pesan berhasil dikirim"}

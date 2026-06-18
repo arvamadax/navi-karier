@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_user
-from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange
+from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
 from .. import models
 from . import controllers
 
@@ -40,6 +40,14 @@ def change_password(
     db: Session = Depends(get_db),
 ):
     return controllers.change_password(payload, user, db)
+
+@router.post("/auth/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    return controllers.forgot_password(payload, db)
+
+@router.post("/auth/reset-password")
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    return controllers.reset_password(payload, db)
 
 # --- CV Upload ---
 @router.post("/upload-cv")
@@ -81,3 +89,8 @@ def analysis_history(
     db: Session = Depends(get_db),
 ):
     return controllers.get_analysis_history(user.id, db)
+
+# --- Contact ---
+@router.post("/contact")
+def contact(payload: ContactRequest):
+    return controllers.handle_contact(payload)

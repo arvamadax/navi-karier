@@ -49,6 +49,13 @@ export default function LoginPage() {
             border: '1px solid var(--border-2)', padding: '10px 12px', color: 'var(--ink)', width: '100%',
           }} />
         </div>
+        <div style={{ textAlign: 'right', marginTop: -6 }}>
+          <Link href="/forgot-password" style={{
+            fontSize: '0.78rem', color: 'var(--ink-3)', textDecoration: 'none',
+          }}>
+            Lupa password?
+          </Link>
+        </div>
         <button
           type="submit"
           disabled={loading}
@@ -59,17 +66,21 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div style={{
-        margin: '20px 0 12px', textAlign: 'center', fontSize: '0.72rem',
-        color: 'var(--ink-3)', fontFamily: 'var(--mono)', letterSpacing: '0.06em',
-      }}>
-        DEMO ACCOUNTS
-      </div>
-      <div style={{ fontSize: '0.75rem', color: 'var(--ink-2)', fontFamily: 'var(--mono)', lineHeight: 1.8 }}>
-        <div>jobseeker@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Job Seeker)</span></div>
-        <div>company@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Company)</span></div>
-        <div>admin@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Admin)</span></div>
-      </div>
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <div style={{
+            margin: '20px 0 12px', textAlign: 'center', fontSize: '0.72rem',
+            color: 'var(--ink-3)', fontFamily: 'var(--mono)', letterSpacing: '0.06em',
+          }}>
+            DEMO ACCOUNTS
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ink-2)', fontFamily: 'var(--mono)', lineHeight: 1.8 }}>
+            <div>jobseeker@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Job Seeker)</span></div>
+            <div>company@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Company)</span></div>
+            <div>admin@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Admin)</span></div>
+          </div>
+        </>
+      )}
 
       <p style={{ textAlign: 'center', fontSize: '0.82rem', color: 'var(--ink-2)', marginTop: 20 }}>
         Belum punya akun?{' '}

@@ -36,6 +36,19 @@ class PasswordChange(BaseModel):
     old_password: str
     new_password: str
 
+class ContactRequest(BaseModel):
+    name: str
+    email: str
+    type: str = "General"
+    message: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
 class AnalyzeRequest(BaseModel):
     cv_id: int
     target_role: str
