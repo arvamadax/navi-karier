@@ -13,7 +13,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: 'Admin',
 };
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -29,7 +29,7 @@ export default function Sidebar() {
     .toUpperCase();
 
   return (
-    <aside className="dash-sidebar">
+    <aside className={`dash-sidebar${open ? ' open' : ''}`}>
       <div className="dash-sidebar-logo">
         <Link href="/" className="dash-logo-link">
           <span className="dash-logo-dot" />
@@ -50,6 +50,7 @@ export default function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn('dash-nav-item', isActive && 'active')}
+                  onClick={() => onClose?.()}
                 >
                   <Icon size={16} />
                   <span>{item.label}</span>

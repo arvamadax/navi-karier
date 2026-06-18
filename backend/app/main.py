@@ -24,4 +24,17 @@ app.include_router(api_router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to NaviKarier API", "version": "0.2.0"}
+    return {"message": "Welcome to NaviKarier API", "version": "2.0.0"}
+
+@app.get("/api/health")
+def health_check():
+    from sqlalchemy import text
+    from .database import SessionLocal
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        db_status = "ok"
+    except Exception:
+        db_status = "error"
+    return {"status": "ok", "database": db_status, "version": "2.0.0"}

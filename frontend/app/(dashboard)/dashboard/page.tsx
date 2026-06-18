@@ -43,8 +43,35 @@ export default function DashboardOverviewPage() {
 
   if (loading) {
     return (
-      <div className="dash-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-        <p style={{ color: 'var(--ink-3)', fontFamily: 'var(--mono)', fontSize: '0.82rem' }}>Loading dashboard...</p>
+      <div className="dash-page">
+        <div className="dash-score-row">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton-card">
+              <div className="skeleton skeleton-line-sm" style={{ width: '50%' }} />
+              <div className="skeleton skeleton-line-lg" />
+              <div className="skeleton skeleton-line-sm" />
+            </div>
+          ))}
+        </div>
+        <div className="dash-grid-2">
+          <div className="skeleton-card">
+            <div className="skeleton skeleton-line" style={{ width: '30%' }} />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="skeleton skeleton-line" style={{ marginTop: 16 }} />
+            ))}
+          </div>
+          <div className="dash-stack">
+            <div className="skeleton-card" style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+              <div className="skeleton skeleton-circle" />
+            </div>
+            <div className="skeleton-card">
+              <div className="skeleton skeleton-line" style={{ width: '40%' }} />
+              {[1, 2].map((i) => (
+                <div key={i} className="skeleton skeleton-line" style={{ marginTop: 12 }} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

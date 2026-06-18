@@ -3,28 +3,44 @@
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import Reveal from '../../components/Reveal';
+import { apiFetch } from '../../lib/api';
 
 export default function ContactPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const [status, setStatus] = useState('');
   const [statusColor, setStatusColor] = useState('var(--green)');
+  const [sending, setSending] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const form = formRef.current;
     if (!form) return;
     const data = new FormData(form);
     const name = (data.get('name') as string)?.trim();
     const email = (data.get('email') as string)?.trim();
+    const type = (data.get('type') as string) || 'General';
     const message = (data.get('message') as string)?.trim();
     if (!name || !email || !message) {
       setStatusColor('var(--red)');
       setStatus('Lengkapi semua field.');
       return;
     }
-    setStatusColor('var(--green)');
-    setStatus('Terkirim. Kami balas dalam 24 jam.');
-    form.reset();
+
+    setSending(true);
+    try {
+      await apiFetch('/contact', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, type, message }),
+      });
+      setStatusColor('var(--green)');
+      setStatus('Terkirim. Kami balas dalam 24 jam.');
+      form.reset();
+    } catch {
+      setStatusColor('var(--red)');
+      setStatus('Gagal mengirim. Coba lagi nanti.');
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -65,7 +81,7 @@ export default function ContactPage() {
                   </select>
                 </div>
                 <div className="field"><label htmlFor="cf-msg">Pesan</label><textarea id="cf-msg" name="message" rows={4} required></textarea></div>
-                <button type="submit" className="form-submit">Kirim Pesan &rarr;</button>
+                <button type="submit" className="form-submit" disabled={sending}>{sending ? 'Mengirim...' : 'Kirim Pesan →'}</button>
                 <div className="form-status" role="status" aria-live="polite" style={{ color: statusColor }}>{status}</div>
               </form>
             </Reveal>
