@@ -29,7 +29,7 @@ function GaugeCard() {
           <span className="gauge-label">Industry Readiness</span>
         </div>
       </div>
-      <div className="scard-text"><b>Satu angka.</b> Readiness score menunjukkan seberapa siap kamu untuk role target.</div>
+      <div className="scard-text"><b>Satu angka.</b> Readiness score menunjukkan seberapa siap Anda untuk role target.</div>
     </div>
   );
 }
@@ -90,7 +90,7 @@ export default function ShowcaseCards() {
             ))}
           </div>
         </div>
-        <div className="scard-text"><b>Visualisasi skill.</b> Lihat posisi skill kamu vs standar industri secara real-time.</div>
+        <div className="scard-text"><b>Visualisasi skill.</b> Lihat posisi skill Anda vs standar industri secara real-time.</div>
       </div>
 
       <GapTableCard />
@@ -118,7 +118,7 @@ export default function ShowcaseCards() {
             </svg>
           </div>
         </div>
-        <div className="scard-text"><b>Track progress.</b> Lihat perkembangan readiness score kamu dari waktu ke waktu.</div>
+        <div className="scard-text"><b>Track progress.</b> Lihat perkembangan readiness score Anda dari waktu ke waktu.</div>
       </div>
     </div>
   );

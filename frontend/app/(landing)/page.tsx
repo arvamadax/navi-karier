@@ -18,9 +18,7 @@ export default function HomePage() {
             </h1>
           </Reveal>
           <Reveal>
-            <p className="hero-sub">
-              NaviKarier menghitung gap antara skill kamu dan standar industri &mdash; matematis, bukan tebakan. Dalam 5 menit kamu tahu harus fokus kemana.
-            </p>
+            <p className="hero-sub">NaviKarier menghitung gap antara skill Anda dan standar industri. Matematis, bukan tebakan. Dalam 5 menit Anda tahu harus fokus ke mana.</p>
           </Reveal>
           <Reveal>
             <div className="hero-ctas">
@@ -39,11 +37,8 @@ export default function HomePage() {
         <div className="wrap">
           <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
             <h2 className="sec-headline">
-              Hitung skill gap kamu secara matematis. Bukan tebakan, bukan <span className="hl">AI black-box.</span>
+              Hitung skill gap Anda secara matematis. Bukan tebakan, bukan <span className="hl">AI black-box.</span>
             </h2>
-            <p className="sec-sub" style={{ marginTop: 24 }}>
-              Upload CV atau input skill manual. Sistem menghitung gap vs standar industri menggunakan taxonomy yang dikurasi dari ribuan job listing Indonesia.
-            </p>
           </Reveal>
           <Reveal>
             <ShowcaseCards />
@@ -55,8 +50,7 @@ export default function HomePage() {
       <section id="demo" className="sec">
         <div className="wrap">
           <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
-            <h2 className="sec-headline">Coba sendiri. Pilih role, lihat <span className="hl">gap-mu.</span></h2>
-            <p className="sec-sub" style={{ marginTop: 24 }}>100% berjalan di browser. Tidak ada data yang dikirim ke server manapun.</p>
+            <h2 className="sec-headline">Coba sendiri. Pilih role, lihat <span className="hl">gap Anda.</span></h2>
           </Reveal>
           <Reveal>
             <DemoWidget />
@@ -69,7 +63,6 @@ export default function HomePage() {
         <div className="wrap">
           <Reveal style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
             <h2 className="sec-headline">Indonesia kehilangan <span className="hl">Rp 142T</span> per tahun karena skill gap.</h2>
-            <p className="sec-sub" style={{ marginTop: 24 }}>Bukan soal kurang lowongan. Masalahnya: skill pelamar tidak match dengan kebutuhan industri. Data BPS dan Bank Indonesia membuktikannya.</p>
           </Reveal>
 
           <Reveal>
@@ -110,7 +103,7 @@ export default function HomePage() {
           <div className="split">
             <Reveal>
               <h2 className="sec-headline">Tebakan bukan <span className="hl">strategi.</span></h2>
-              <p className="sec-sub" style={{ marginTop: 24 }}>Kebanyakan job seeker belajar tanpa arah. NaviKarier memberikan peta yang jelas: apa yang kurang, seberapa jauh gap-nya, dan skill mana yang paling berdampak.</p>
+              <p className="sec-sub">Kebanyakan job seeker belajar tanpa arah. NaviKarier memberikan peta yang jelas: apa yang kurang, seberapa jauh gap-nya, dan skill mana yang paling berdampak.</p>
             </Reveal>
             <Reveal style={{ paddingTop: 16 }}>
               <div style={{ border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -140,7 +133,7 @@ export default function HomePage() {
         <div className="wrap">
           <Reveal style={{ textAlign: 'center' }}>
             <h2 className="sec-headline" style={{ maxWidth: 700, margin: '0 auto 24px' }}>Architecture Overview</h2>
-            <p className="sec-sub" style={{ margin: '0 auto' }}>Bagaimana NaviKarier memproses data skill kamu menjadi insight yang actionable.</p>
+            <p className="sec-sub" style={{ maxWidth: 700, margin: '0 auto' }}>Bagaimana NaviKarier memproses data skill Anda menjadi insight yang actionable.</p>
           </Reveal>
           <Reveal style={{ marginTop: 64, maxWidth: 900, marginLeft: 'auto', marginRight: 'auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
@@ -192,8 +185,7 @@ export default function HomePage() {
         <div className="cta-glow"></div>
         <div className="wrap" style={{ position: 'relative', zIndex: 1 }}>
           <Reveal>
-            <h2 className="sec-headline" style={{ margin: '0 auto 24px', textAlign: 'center', maxWidth: 700 }}>Siap tahu posisi skill kamu <span className="hl">sebenarnya?</span></h2>
-            <p className="sec-sub" style={{ textAlign: 'center', margin: '0 auto 40px' }}>5 menit. Tanpa signup. Langsung lihat gap kamu vs standar industri.</p>
+            <h2 className="sec-headline" style={{ margin: '0 auto 40px', textAlign: 'center', maxWidth: 700 }}>Siap tahu posisi skill Anda <span className="hl">sebenarnya?</span></h2>
             <div style={{ display: 'flex', gap: 0, justifyContent: 'center' }}>
               <Link href="/register" className="hero-btn primary">Mulai Gratis</Link>
               <Link href="/login" className="hero-btn ghost">Masuk &rarr;</Link>

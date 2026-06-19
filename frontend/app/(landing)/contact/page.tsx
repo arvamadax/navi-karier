@@ -50,7 +50,7 @@ export default function ContactPage() {
           <Reveal>
             <Link href="/" style={{ display: 'inline-block', fontSize: '0.85rem', color: 'var(--ink-2)', marginBottom: 32 }}>&larr; Kembali ke Beranda</Link>
             <h1>Hubungi Kami</h1>
-            <p>Untuk demo enterprise, press, kolaborasi kampus, atau pertanyaan apapun &mdash; kami terbuka.</p>
+            <p>Untuk demo enterprise, press, kolaborasi kampus, atau pertanyaan apapun, kami terbuka.</p>
           </Reveal>
         </div>
       </section>

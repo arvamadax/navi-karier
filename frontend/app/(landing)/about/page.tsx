@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Reveal from '../../components/Reveal';
 
-export const metadata: Metadata = { title: 'NaviKarier — Tentang Kami' };
+export const metadata: Metadata = { title: 'NaviKarier | Tentang Kami' };
 
 const team = [
   { name: 'Arva Mada Jayastu', role: 'Project Lead, Frontend Developer', img: '/assets/team-arva.jpg' },

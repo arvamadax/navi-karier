@@ -11,9 +11,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: Props): Metadata {
   const post = getPost(params.slug);
-  if (!post) return { title: 'Not Found — NaviKarier' };
+  if (!post) return { title: 'Not Found | NaviKarier' };
   return {
-    title: `${post.title} — NaviKarier Blog`,
+    title: `${post.title} | NaviKarier Blog`,
     description: post.excerpt,
   };
 }

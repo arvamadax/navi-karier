@@ -3,7 +3,7 @@ import { posts, formatDate } from './data';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Blog — NaviKarier',
+  title: 'Blog | NaviKarier',
   description: 'Insight, tutorial, dan data seputar skill gap, karier, dan upskilling di Indonesia.',
 };
 
@@ -67,7 +67,7 @@ export default function BlogPage() {
               textAlign: 'center',
             }}
           >
-            Data, tutorial, dan analisis untuk membantu kamu menutup gap dan membangun karier yang lebih kuat.
+            Data, tutorial, dan analisis untuk membantu Anda menutup gap dan membangun karier yang lebih kuat.
           </p>
         </div>
       </section>

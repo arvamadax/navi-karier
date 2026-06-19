@@ -12,7 +12,7 @@ export default function Footer() {
               NaviKarier
             </div>
             <p className="tagline">Dari tebakan jadi data.</p>
-            <p className="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &mdash; BI &times; OJK.</p>
+            <p className="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &times; BI &times; OJK.</p>
           </div>
           <div className="footer-col">
             <h5>Produk</h5>
