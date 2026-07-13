@@ -78,6 +78,7 @@ export type AnalysisResult = {
   skills: SkillGap[];
   missing_skills: string[];
   recommended_courses: string[];
+  reference_standard: string | null;
 };
 
 export type RecommendationDetail = {
@@ -89,4 +90,5 @@ export type RecommendationDetail = {
   missing_skills: string[];
   recommended_courses: string[];
   created_at: string | null;
+  reference_standard: string | null;
 };

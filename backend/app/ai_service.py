@@ -3,6 +3,8 @@ import json
 import logging
 from typing import Dict, Any
 
+from .skkni_reference import get_skkni_reference, format_reference_standard
+
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """Kamu adalah Career Advisor AI untuk platform NaviKarier Indonesia.
@@ -21,7 +23,8 @@ Kamu HARUS merespons dalam format JSON yang valid (tanpa markdown, tanpa backtic
     }
   ],
   "missing_skills": ["<skill yang gap-nya >= 20>"],
-  "recommended_courses": ["<nama course spesifik dan platform yang relevan, max 8 items>"]
+  "recommended_courses": ["<nama course spesifik dan platform yang relevan, max 8 items>"],
+  "reference_standard": <string acuan SKKNI persis seperti yang diberikan di prompt, atau null jika tidak ada acuan SKKNI yang diberikan>
 }
 
 Panduan:
@@ -33,6 +36,7 @@ Panduan:
 - Untuk "required", sesuaikan dengan level: JUNIOR (50-70), MID (65-80), SENIOR (75-95)
 - Rekomendasikan course dari platform populer: Coursera, Udemy, Dicoding, LinkedIn Learning, edX, Kaggle, freeCodeCamp
 - Prioritaskan course untuk skill dengan gap terbesar
+- JANGAN PERNAH MENGARANG nomor regulasi SKKNI (Kepmenaker) atau kode unit kompetensi sendiri. Isi "reference_standard" HANYA dari referensi SKKNI yang diberikan eksplisit di prompt; jika tidak diberi referensi, isi null dan jangan sebut nomor regulasi apa pun di field lain
 - HANYA output JSON, tanpa teks lain"""
 
 
@@ -44,11 +48,22 @@ def analyze_cv_with_claude(cv_text: str, target_role: str, level: str = "MID") -
     import anthropic
     client = anthropic.Anthropic(api_key=api_key)
 
+    ref = get_skkni_reference(target_role)
+    if ref:
+        skkni_block = f"""Gunakan referensi SKKNI berikut sebagai acuan standar kompetensi:
+Skema '{ref['scheme_name']}', {ref['regulation']}. {ref['note']}
+Selaraskan skill yang kamu pilih dengan konteks skema ini bila relevan.
+Isi field "reference_standard" di JSON output dengan: "{ref['scheme_name']} — {ref['regulation']}"."""
+    else:
+        skkni_block = """Belum ada skema SKKNI resmi yang terverifikasi untuk role ini. Gunakan kompetensi berbasis praktik industri umum, dan isi field "reference_standard" dengan null."""
+
     user_message = f"""Analisis CV berikut untuk posisi **{target_role}** level **{level}**:
 
 ---CV TEXT---
 {cv_text[:8000]}
 ---END CV---
+
+{skkni_block}
 
 Berikan analisis gap skill dalam format JSON sesuai instruksi."""
 
@@ -88,6 +103,9 @@ Berikan analisis gap skill dalam format JSON sesuai instruksi."""
         result["match_score"] = max(0, min(100, round(float(result["match_score"]), 1)))
         result["missing_skills"] = [s["skill"] for s in result["skills"] if s["gap"] >= 20]
         result["recommended_courses"] = result.get("recommended_courses", [])[:8]
+        # Deterministik dari kurasi lokal — output model tidak dipercaya untuk
+        # klaim regulasi (None kalau role tidak punya skema terverifikasi).
+        result["reference_standard"] = format_reference_standard(target_role)
 
         return result
 

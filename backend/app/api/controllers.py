@@ -8,6 +8,7 @@ from jose import JWTError, jwt as jose_jwt
 from ..auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from ..schemas import UserRegister, UserLogin, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
 from ..email_service import send_reset_password_email
+from ..skkni_reference import format_reference_standard
 
 
 def register_user(payload: UserRegister, db: Session):
@@ -89,6 +90,7 @@ def calculate_gap(cv_id: int, target_role: str, level: str, db: Session, user_id
         "skills": result["skills"],
         "missing_skills": result["missing_skills"],
         "recommended_courses": result["recommended_courses"],
+        "reference_standard": result.get("reference_standard") or format_reference_standard(target_role),
     }
 
 
@@ -111,6 +113,7 @@ def get_analysis(analysis_id: int, user_id: int, db: Session):
         "missing_skills": analysis.missing_skills.split(",") if analysis.missing_skills else [],
         "recommended_courses": analysis.recommended_courses.split(",") if analysis.recommended_courses else [],
         "created_at": analysis.created_at.isoformat() if analysis.created_at else None,
+        "reference_standard": format_reference_standard(analysis.target_role),
     }
 
 
