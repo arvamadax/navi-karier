@@ -131,6 +131,18 @@ function GapDetailPage() {
         </div>
       </div>
 
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        fontSize: '0.72rem', fontFamily: 'var(--mono)', letterSpacing: '0.02em',
+        color: 'var(--ink-2)', background: 'rgba(255,255,255,0.03)',
+        border: '1px solid var(--border)', borderRadius: 6, padding: '6px 12px',
+      }}>
+        <span style={{ width: 5, height: 5, borderRadius: '50%', background: data.reference_standard ? 'var(--green)' : 'var(--ink-3)', flexShrink: 0 }} />
+        {data.reference_standard
+          ? `Berdasarkan SKKNI: ${data.reference_standard}`
+          : 'Kompetensi berbasis praktik industri umum (SKKNI belum tersedia untuk role ini)'}
+      </div>
+
       {groups.map((group) => (
         <div key={group.name} className="dash-card">
           <div className="dash-card-header">

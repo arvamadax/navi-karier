@@ -17,6 +17,9 @@ export default function RegisterPage() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
+    } else {
+      // Full reload so SessionProvider picks up the new session immediately.
+      window.location.href = '/dashboard';
     }
   }
 

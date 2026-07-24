@@ -1,9 +1,15 @@
 import os
 import json
+import time
 import logging
 from typing import Dict, Any
 
+from .skkni_reference import get_skkni_reference, format_reference_standard
+
 logger = logging.getLogger(__name__)
+
+_MAX_ATTEMPTS = 3  # 1 percobaan awal + 2 retry
+_RETRY_BACKOFF_S = (1, 2)
 
 SYSTEM_PROMPT = """Kamu adalah Career Advisor AI untuk platform NaviKarier Indonesia.
 Tugasmu: menganalisis teks CV kandidat dan membandingkan skill-nya dengan requirement untuk target role dan level tertentu.
@@ -21,7 +27,8 @@ Kamu HARUS merespons dalam format JSON yang valid (tanpa markdown, tanpa backtic
     }
   ],
   "missing_skills": ["<skill yang gap-nya >= 20>"],
-  "recommended_courses": ["<nama course spesifik dan platform yang relevan, max 8 items>"]
+  "recommended_courses": ["<nama course spesifik dan platform yang relevan, max 8 items>"],
+  "reference_standard": <string acuan SKKNI persis seperti yang diberikan di prompt, atau null jika tidak ada acuan SKKNI yang diberikan>
 }
 
 Panduan:
@@ -33,6 +40,7 @@ Panduan:
 - Untuk "required", sesuaikan dengan level: JUNIOR (50-70), MID (65-80), SENIOR (75-95)
 - Rekomendasikan course dari platform populer: Coursera, Udemy, Dicoding, LinkedIn Learning, edX, Kaggle, freeCodeCamp
 - Prioritaskan course untuk skill dengan gap terbesar
+- JANGAN PERNAH MENGARANG nomor regulasi SKKNI (Kepmenaker) atau kode unit kompetensi sendiri. Isi "reference_standard" HANYA dari referensi SKKNI yang diberikan eksplisit di prompt; jika tidak diberi referensi, isi null dan jangan sebut nomor regulasi apa pun di field lain
 - HANYA output JSON, tanpa teks lain"""
 
 
@@ -44,56 +52,80 @@ def analyze_cv_with_claude(cv_text: str, target_role: str, level: str = "MID") -
     import anthropic
     client = anthropic.Anthropic(api_key=api_key)
 
+    ref = get_skkni_reference(target_role)
+    if ref:
+        skkni_block = f"""Gunakan referensi SKKNI berikut sebagai acuan standar kompetensi:
+Skema '{ref['scheme_name']}', {ref['regulation']}. {ref['note']}
+Selaraskan skill yang kamu pilih dengan konteks skema ini bila relevan.
+Isi field "reference_standard" di JSON output dengan: "{ref['scheme_name']} — {ref['regulation']}"."""
+    else:
+        skkni_block = """Belum ada skema SKKNI resmi yang terverifikasi untuk role ini. Gunakan kompetensi berbasis praktik industri umum, dan isi field "reference_standard" dengan null."""
+
     user_message = f"""Analisis CV berikut untuk posisi **{target_role}** level **{level}**:
 
 ---CV TEXT---
 {cv_text[:8000]}
 ---END CV---
 
+{skkni_block}
+
 Berikan analisis gap skill dalam format JSON sesuai instruksi."""
 
-    try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}],
-        )
+    result = None
+    for attempt in range(1, _MAX_ATTEMPTS + 1):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=2000,
+                system=SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_message}],
+            )
 
-        raw = response.content[0].text.strip()
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-            if raw.endswith("```"):
-                raw = raw[:-3]
-            raw = raw.strip()
+            raw = response.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
+                if raw.endswith("```"):
+                    raw = raw[:-3]
+                raw = raw.strip()
 
-        result = json.loads(raw)
+            result = json.loads(raw)
+            break
+        # anthropic.APIError mencakup APITimeoutError, RateLimitError, dan
+        # APIConnectionError (semua subclass-nya di SDK ini).
+        except (anthropic.APIError, json.JSONDecodeError) as e:
+            if attempt == _MAX_ATTEMPTS:
+                logger.error("Claude analysis gagal setelah %d percobaan: %s", attempt, e)
+                if isinstance(e, json.JSONDecodeError):
+                    raise ValueError("AI response was not valid JSON") from e
+                raise ValueError(f"AI service error: {getattr(e, 'message', str(e))}") from e
+            delay = _RETRY_BACKOFF_S[attempt - 1]
+            logger.warning(
+                "Claude attempt %d/%d gagal (%s: %s) — retry dalam %ds",
+                attempt, _MAX_ATTEMPTS, type(e).__name__, e, delay,
+            )
+            time.sleep(delay)
 
-        if not isinstance(result.get("match_score"), (int, float)):
-            raise ValueError("Invalid match_score")
-        if not isinstance(result.get("skills"), list) or len(result["skills"]) == 0:
-            raise ValueError("Invalid skills array")
+    if not isinstance(result.get("match_score"), (int, float)):
+        raise ValueError("Invalid match_score")
+    if not isinstance(result.get("skills"), list) or len(result["skills"]) == 0:
+        raise ValueError("Invalid skills array")
 
-        for skill in result["skills"]:
-            skill["current"] = max(0, min(100, int(skill.get("current", 0))))
-            skill["required"] = max(0, min(100, int(skill.get("required", 0))))
-            skill["gap"] = max(0, skill["required"] - skill["current"])
-            if skill["gap"] >= 30:
-                skill["priority"] = "HIGH"
-            elif skill["gap"] >= 15:
-                skill["priority"] = "MEDIUM"
-            else:
-                skill["priority"] = "LOW"
+    for skill in result["skills"]:
+        skill["current"] = max(0, min(100, int(skill.get("current", 0))))
+        skill["required"] = max(0, min(100, int(skill.get("required", 0))))
+        skill["gap"] = max(0, skill["required"] - skill["current"])
+        if skill["gap"] >= 30:
+            skill["priority"] = "HIGH"
+        elif skill["gap"] >= 15:
+            skill["priority"] = "MEDIUM"
+        else:
+            skill["priority"] = "LOW"
 
-        result["match_score"] = max(0, min(100, round(float(result["match_score"]), 1)))
-        result["missing_skills"] = [s["skill"] for s in result["skills"] if s["gap"] >= 20]
-        result["recommended_courses"] = result.get("recommended_courses", [])[:8]
+    result["match_score"] = max(0, min(100, round(float(result["match_score"]), 1)))
+    result["missing_skills"] = [s["skill"] for s in result["skills"] if s["gap"] >= 20]
+    result["recommended_courses"] = result.get("recommended_courses", [])[:8]
+    # Deterministik dari kurasi lokal — output model tidak dipercaya untuk
+    # klaim regulasi (None kalau role tidak punya skema terverifikasi).
+    result["reference_standard"] = format_reference_standard(target_role)
 
-        return result
-
-    except json.JSONDecodeError as e:
-        logger.error("Failed to parse Claude response as JSON: %s", e)
-        raise ValueError("AI response was not valid JSON") from e
-    except anthropic.APIError as e:
-        logger.error("Claude API error: %s", e)
-        raise ValueError(f"AI service error: {e.message}") from e
+    return result

@@ -17,6 +17,9 @@ export default function LoginPage() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
+    } else {
+      // Full reload so SessionProvider picks up the new session immediately.
+      window.location.href = '/dashboard';
     }
   }
 
@@ -75,9 +78,9 @@ export default function LoginPage() {
             DEMO ACCOUNTS
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--ink-2)', fontFamily: 'var(--mono)', lineHeight: 1.8 }}>
-            <div>jobseeker@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Job Seeker)</span></div>
-            <div>company@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Company)</span></div>
-            <div>admin@demo.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Admin)</span></div>
+            <div>budi@email.com / demo123 <span style={{ color: 'var(--ink-3)' }}>(Job Seeker)</span></div>
+            <div>hr@techcorp.id / company123 <span style={{ color: 'var(--ink-3)' }}>(Company)</span></div>
+            <div>admin@navikarier.id / admin123 <span style={{ color: 'var(--ink-3)' }}>(Admin)</span></div>
           </div>
         </>
       )}

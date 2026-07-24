@@ -1,14 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { apiFetch, type DashboardOverview, type SkillGap } from '../../lib/api';
 
 export default function DashboardOverviewPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Company/Admin land on their own dashboard, not the job-seeker overview.
+  useEffect(() => {
+    const role = session?.user?.role;
+    if (role === 'COMPANY') router.replace('/dashboard/company');
+    else if (role === 'ADMIN') router.replace('/dashboard/admin');
+  }, [session, router]);
 
   useEffect(() => {
     const token = session?.user?.accessToken;
