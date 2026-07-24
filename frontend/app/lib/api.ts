@@ -92,3 +92,49 @@ export type RecommendationDetail = {
   created_at: string | null;
   reference_standard: string | null;
 };
+
+export type RoleCount = { role: string; count: number };
+export type GapAgg = { skill: string; avg_gap: number; count: number };
+
+export type AdminOverview = {
+  total_users: number;
+  total_jobseekers: number;
+  total_companies: number;
+  total_admins: number;
+  total_analyses: number;
+  total_cvs: number;
+  avg_match_score: number;
+  users_by_role: Record<string, number>;
+  top_roles: RoleCount[];
+  recent_users: { id: number; name: string; email: string; role: string; created_at: string | null }[];
+};
+
+export type AdminUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  phone: string | null;
+  target_role: string | null;
+  analyses_count: number;
+  created_at: string | null;
+};
+
+export type CompanyOverview = {
+  total_candidates: number;
+  total_analyses: number;
+  avg_match_score: number;
+  job_ready: number;
+  top_roles: RoleCount[];
+  top_gaps: GapAgg[];
+};
+
+export type TalentCandidate = {
+  analysis_id: number;
+  candidate: string;
+  target_role: string;
+  level: string;
+  match_score: number;
+  missing_count: number;
+  created_at: string | null;
+};

@@ -282,3 +282,130 @@ def handle_contact(payload: ContactRequest):
         print(f"[EMAIL ERROR] Contact form failed: {e}")
 
     return {"message": "Pesan berhasil dikirim"}
+
+
+# ============ Admin (aggregate, read-only over existing tables) ============
+
+def get_admin_overview(db: Session):
+    users = db.query(models.User).all()
+    analyses = db.query(models.AnalysisResult).all()
+    cv_count = db.query(models.CVData).count()
+
+    by_role: dict[str, int] = {}
+    for u in users:
+        by_role[u.role] = by_role.get(u.role, 0) + 1
+
+    scores = [a.match_score for a in analyses if a.match_score is not None]
+    avg_score = round(sum(scores) / len(scores), 1) if scores else 0
+
+    role_demand: dict[str, int] = {}
+    for a in analyses:
+        role_demand[a.target_role] = role_demand.get(a.target_role, 0) + 1
+    top_roles = sorted(role_demand.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    recent = db.query(models.User).order_by(models.User.created_at.desc()).limit(8).all()
+
+    return {
+        "total_users": len(users),
+        "total_jobseekers": by_role.get("JOBSEEKER", 0),
+        "total_companies": by_role.get("COMPANY", 0),
+        "total_admins": by_role.get("ADMIN", 0),
+        "total_analyses": len(analyses),
+        "total_cvs": cv_count,
+        "avg_match_score": avg_score,
+        "users_by_role": by_role,
+        "top_roles": [{"role": r, "count": c} for r, c in top_roles],
+        "recent_users": [
+            {
+                "id": u.id, "name": u.name, "email": u.email, "role": u.role,
+                "created_at": u.created_at.isoformat() if u.created_at else None,
+            }
+            for u in recent
+        ],
+    }
+
+
+def get_admin_users(db: Session):
+    users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+    counts: dict[int, int] = {}
+    for (uid,) in db.query(models.AnalysisResult.user_id).all():
+        counts[uid] = counts.get(uid, 0) + 1
+    return [
+        {
+            "id": u.id, "name": u.name, "email": u.email, "role": u.role,
+            "phone": u.phone, "target_role": u.target_role,
+            "analyses_count": counts.get(u.id, 0),
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in users
+    ]
+
+
+# ============ Company (talent pool = platform-wide analyses) ============
+# Talent pool is platform-wide: the schema has no company-candidate link yet.
+# Add an invite/link table when companies need private, per-company pools.
+
+def _aggregate_top_gaps(analyses, limit: int = 8):
+    agg: dict[str, list[int]] = {}  # skill -> [sum_gap, count]
+    for a in analyses:
+        if not a.skill_details:
+            continue
+        try:
+            skills = json.loads(a.skill_details)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        for s in skills:
+            gap = s.get("gap", 0)
+            if gap <= 0:
+                continue
+            entry = agg.setdefault(s.get("skill", "?"), [0, 0])
+            entry[0] += gap
+            entry[1] += 1
+    rows = [
+        {"skill": k, "avg_gap": round(v[0] / v[1], 1), "count": v[1]}
+        for k, v in agg.items()
+    ]
+    rows.sort(key=lambda x: (x["avg_gap"], x["count"]), reverse=True)
+    return rows[:limit]
+
+
+def get_company_overview(db: Session):
+    analyses = db.query(models.AnalysisResult).all()
+    candidate_ids = {a.user_id for a in analyses}
+    scores = [a.match_score for a in analyses if a.match_score is not None]
+    avg_score = round(sum(scores) / len(scores), 1) if scores else 0
+
+    role_demand: dict[str, int] = {}
+    for a in analyses:
+        role_demand[a.target_role] = role_demand.get(a.target_role, 0) + 1
+    top_roles = sorted(role_demand.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    return {
+        "total_candidates": len(candidate_ids),
+        "total_analyses": len(analyses),
+        "avg_match_score": avg_score,
+        "job_ready": sum(1 for s in scores if s >= 75),
+        "top_roles": [{"role": r, "count": c} for r, c in top_roles],
+        "top_gaps": _aggregate_top_gaps(analyses),
+    }
+
+
+def get_company_talent(db: Session):
+    rows = (
+        db.query(models.AnalysisResult, models.User)
+        .join(models.User, models.AnalysisResult.user_id == models.User.id)
+        .order_by(models.AnalysisResult.match_score.desc())
+        .all()
+    )
+    return [
+        {
+            "analysis_id": a.id,
+            "candidate": u.name,
+            "target_role": a.target_role,
+            "level": a.level,
+            "match_score": a.match_score,
+            "missing_count": len(a.missing_skills.split(",")) if a.missing_skills else 0,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+        }
+        for a, u in rows
+    ]

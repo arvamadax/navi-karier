@@ -56,7 +56,7 @@ Thumbs.db
 # Coverage
 coverage/
 
-# Claude Code (internal dev tooling — not public)
+# Local dev tooling & editor state (not public)
 CLAUDE.md
 .claudeignore
 .claude/

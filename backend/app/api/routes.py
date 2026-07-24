@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..auth import get_current_user
+from ..auth import get_current_user, require_role
 from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
 from .. import models
 from . import controllers
@@ -94,3 +94,21 @@ def analysis_history(
 @router.post("/contact")
 def contact(payload: ContactRequest):
     return controllers.handle_contact(payload)
+
+# --- Admin (ADMIN only) ---
+@router.get("/admin/overview")
+def admin_overview(user: models.User = Depends(require_role("ADMIN")), db: Session = Depends(get_db)):
+    return controllers.get_admin_overview(db)
+
+@router.get("/admin/users")
+def admin_users(user: models.User = Depends(require_role("ADMIN")), db: Session = Depends(get_db)):
+    return controllers.get_admin_users(db)
+
+# --- Company (COMPANY or ADMIN) ---
+@router.get("/company/overview")
+def company_overview(user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.get_company_overview(db)
+
+@router.get("/company/talent")
+def company_talent(user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.get_company_talent(db)
