@@ -1,5 +1,6 @@
 import json
 import os
+import secrets
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from .. import services, models
@@ -7,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt as jose_jwt
 from ..auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from ..schemas import UserRegister, UserLogin, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
-from ..email_service import send_reset_password_email
+from ..email_service import send_reset_password_email, send_invite_email
 from ..skkni_reference import format_reference_standard
 
 
@@ -409,3 +410,171 @@ def get_company_talent(db: Session):
         }
         for a, u in rows
     ]
+
+
+# ============ Job Roles (company defines competency requirements) ============
+
+def _job_role_dict(role: models.JobRole, db: Session):
+    # ponytail: match = candidates whose target_role string == this title.
+    # Swap for skill-overlap scoring when a stricter match is needed.
+    match_count = (
+        db.query(models.AnalysisResult)
+        .filter(models.AnalysisResult.target_role == role.title)
+        .count()
+    )
+    skills = [s.strip() for s in (role.required_skills or "").split(",") if s.strip()]
+    return {
+        "id": role.id, "title": role.title, "level": role.level,
+        "required_skills": skills, "match_count": match_count,
+        "created_at": role.created_at.isoformat() if role.created_at else None,
+    }
+
+
+def create_job_role(payload, user: models.User, db: Session):
+    if not payload.title.strip():
+        raise HTTPException(status_code=400, detail="Judul posisi wajib diisi")
+    role = models.JobRole(
+        user_id=user.id, title=payload.title.strip(),
+        level=payload.level, required_skills=payload.required_skills.strip(),
+    )
+    db.add(role)
+    db.commit()
+    db.refresh(role)
+    return _job_role_dict(role, db)
+
+
+def list_job_roles(user: models.User, db: Session):
+    roles = (
+        db.query(models.JobRole)
+        .filter(models.JobRole.user_id == user.id)
+        .order_by(models.JobRole.created_at.desc())
+        .all()
+    )
+    return [_job_role_dict(r, db) for r in roles]
+
+
+def delete_job_role(role_id: int, user: models.User, db: Session):
+    role = (
+        db.query(models.JobRole)
+        .filter(models.JobRole.id == role_id, models.JobRole.user_id == user.id)
+        .first()
+    )
+    if not role:
+        raise HTTPException(status_code=404, detail="Job role tidak ditemukan")
+    db.delete(role)
+    db.commit()
+    return {"message": "Job role dihapus"}
+
+
+# ============ Invite & Assess ============
+
+def _invite_dict(inv: models.Invite):
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+    return {
+        "id": inv.id, "token": inv.token, "target_role": inv.target_role,
+        "level": inv.level, "candidate_email": inv.candidate_email,
+        "candidate_name": inv.candidate_name, "status": inv.status,
+        "link": f"{frontend_url}/invite/{inv.token}",
+        "created_at": inv.created_at.isoformat() if inv.created_at else None,
+    }
+
+
+def create_invite(payload, user: models.User, db: Session):
+    inv = models.Invite(
+        user_id=user.id, token=secrets.token_urlsafe(16),
+        target_role=payload.target_role, level=payload.level,
+        candidate_email=payload.candidate_email,
+    )
+    db.add(inv)
+    db.commit()
+    db.refresh(inv)
+
+    result = _invite_dict(inv)
+    if payload.candidate_email:
+        send_invite_email(payload.candidate_email, result["link"], user.name, payload.target_role)
+    return result
+
+
+def list_invites(user: models.User, db: Session):
+    invs = (
+        db.query(models.Invite)
+        .filter(models.Invite.user_id == user.id)
+        .order_by(models.Invite.created_at.desc())
+        .all()
+    )
+    return [_invite_dict(i) for i in invs]
+
+
+def get_invite_public(token: str, db: Session):
+    inv = db.query(models.Invite).filter(models.Invite.token == token).first()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Undangan tidak ditemukan atau sudah kedaluwarsa")
+    company = db.query(models.User).filter(models.User.id == inv.user_id).first()
+    return {
+        "target_role": inv.target_role, "level": inv.level,
+        "company_name": company.name if company else "Perusahaan",
+        "status": inv.status,
+    }
+
+
+def submit_invite_assessment(token: str, name: str, file: UploadFile, db: Session):
+    inv = db.query(models.Invite).filter(models.Invite.token == token).first()
+    if not inv:
+        raise HTTPException(status_code=404, detail="Undangan tidak ditemukan")
+    if not file.filename or not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Hanya file PDF yang didukung")
+
+    # Guest user per invite so the analysis surfaces in the talent pool.
+    email = inv.candidate_email or f"guest+{token}@invite.navikarier.local"
+    guest = db.query(models.User).filter(models.User.email == email).first()
+    if not guest:
+        guest = models.User(
+            name=name.strip() or "Kandidat", email=email,
+            password_hash=hash_password(secrets.token_urlsafe(12)),
+            role="JOBSEEKER", target_role=inv.target_role, experience_level=inv.level,
+        )
+        db.add(guest)
+        db.commit()
+        db.refresh(guest)
+
+    extracted = services.extract_text_from_pdf(file.file)
+    db.add(models.CVData(extracted_text=extracted, user_id=guest.id))
+    db.commit()
+
+    result = services.analyze_gap_with_llm(extracted, inv.target_role, inv.level)
+    db.add(models.AnalysisResult(
+        match_score=result["match_score"], target_role=inv.target_role, level=inv.level,
+        missing_skills=",".join(result["missing_skills"]),
+        skill_details=json.dumps(result["skills"]),
+        recommended_courses=",".join(result["recommended_courses"]),
+        user_id=guest.id,
+    ))
+    inv.status = "COMPLETED"
+    inv.candidate_name = name.strip() or inv.candidate_name
+    db.commit()
+
+    return {
+        "match_score": result["match_score"],
+        "target_role": inv.target_role,
+        "missing_count": len(result["missing_skills"]),
+    }
+
+
+# ============ OAuth bridge (Google sign-in -> backend user + JWT) ============
+
+def oauth_login(email: str, name: str, db: Session):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        user = models.User(
+            name=name or email.split("@")[0], email=email,
+            password_hash=hash_password(secrets.token_urlsafe(16)),
+            role="JOBSEEKER",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    token = create_access_token({"sub": str(user.id), "role": user.role})
+    return {
+        "access_token": token, "token_type": "bearer",
+        "user": {"id": user.id, "name": user.name, "email": user.email, "role": user.role},
+    }

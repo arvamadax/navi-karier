@@ -24,6 +24,7 @@ const inputStyle = {
 export default function SettingsPage() {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
+  const isJobseeker = (session?.user?.role ?? 'JOBSEEKER') === 'JOBSEEKER';
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,21 +144,23 @@ export default function SettingsPage() {
             <textarea id="s-bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Ceritakan tentang dirimu..." rows={3}
               style={{ ...inputStyle, resize: 'vertical' }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div className="field">
-              <label htmlFor="s-role">Target Role</label>
-              <input id="s-role" type="text" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="e.g. Software Engineer" style={inputStyle} />
+          {isJobseeker && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="field">
+                <label htmlFor="s-role">Target Role</label>
+                <input id="s-role" type="text" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="e.g. Software Engineer" style={inputStyle} />
+              </div>
+              <div className="field">
+                <label htmlFor="s-level">Experience Level</label>
+                <select id="s-level" value={expLevel} onChange={(e) => setExpLevel(e.target.value)} style={inputStyle}>
+                  <option value="">Pilih level</option>
+                  <option value="JUNIOR">Junior</option>
+                  <option value="MID">Mid</option>
+                  <option value="SENIOR">Senior</option>
+                </select>
+              </div>
             </div>
-            <div className="field">
-              <label htmlFor="s-level">Experience Level</label>
-              <select id="s-level" value={expLevel} onChange={(e) => setExpLevel(e.target.value)} style={inputStyle}>
-                <option value="">Pilih level</option>
-                <option value="JUNIOR">Junior</option>
-                <option value="MID">Mid</option>
-                <option value="SENIOR">Senior</option>
-              </select>
-            </div>
-          </div>
+          )}
 
           {msg && (
             <div style={{ fontSize: '0.82rem', padding: '8px 12px', borderRadius: 6, background: msg.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', color: msg.ok ? 'var(--green)' : 'var(--red)' }}>

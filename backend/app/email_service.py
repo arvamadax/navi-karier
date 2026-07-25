@@ -42,3 +42,37 @@ def send_reset_password_email(to_email: str, token: str, user_name: str) -> bool
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send reset email to {to_email}: {e}")
         return False
+
+
+def send_invite_email(to_email: str, link: str, company_name: str, target_role: str) -> bool:
+    if not RESEND_API_KEY:
+        print(f"[DEV] Invite link for {to_email} ({target_role} @ {company_name}): {link}")
+        return True
+
+    resend.api_key = RESEND_API_KEY
+    try:
+        resend.Emails.send({
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "subject": f"Undangan Asesmen — {target_role} di {company_name}",
+            "html": f"""
+            <div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+                <h2 style="margin-bottom: 8px;">Undangan Asesmen Skill</h2>
+                <p style="color: #52525b; font-size: 14px;">
+                    {company_name} mengundangmu untuk asesmen posisi <strong>{target_role}</strong>.
+                    Unggah CV-mu untuk melihat kecocokan skill secara instan.
+                </p>
+                <a href="{link}"
+                   style="display: inline-block; background: #e11d48; color: #fff;
+                          padding: 12px 24px; border-radius: 8px; text-decoration: none;
+                          font-weight: 600; margin: 20px 0;">
+                    Mulai Asesmen
+                </a>
+                <p style="color: #71717a; font-size: 12px;">Jika kamu tidak mengenali undangan ini, abaikan email ini.</p>
+            </div>
+            """,
+        })
+        return True
+    except Exception as e:
+        print(f"[EMAIL ERROR] Failed to send invite email to {to_email}: {e}")
+        return False

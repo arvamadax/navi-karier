@@ -44,3 +44,26 @@ class AnalysisResult(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="analysis_results")
+
+class JobRole(Base):
+    __tablename__ = "job_roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))  # company owner
+    title = Column(String)
+    level = Column(String, default="MID")
+    required_skills = Column(Text)  # comma-separated
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class Invite(Base):
+    __tablename__ = "invites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))  # company owner
+    token = Column(String, unique=True, index=True)
+    target_role = Column(String)
+    level = Column(String, default="MID")
+    candidate_email = Column(String, nullable=True)
+    candidate_name = Column(String, nullable=True)
+    status = Column(String, default="PENDING")  # PENDING | COMPLETED
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

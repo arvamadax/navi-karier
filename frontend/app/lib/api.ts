@@ -138,3 +138,31 @@ export type TalentCandidate = {
   missing_count: number;
   created_at: string | null;
 };
+
+export type JobRole = {
+  id: number;
+  title: string;
+  level: string;
+  required_skills: string[];
+  match_count: number;
+  created_at: string | null;
+};
+
+export type Invite = {
+  id: number;
+  token: string;
+  target_role: string;
+  level: string;
+  candidate_email: string | null;
+  candidate_name: string | null;
+  status: string;
+  link: string;
+  created_at: string | null;
+};
+
+export type InvitePublic = {
+  target_role: string;
+  level: string;
+  company_name: string;
+  status: string;
+};

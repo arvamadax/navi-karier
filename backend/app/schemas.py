@@ -54,6 +54,16 @@ class AnalyzeRequest(BaseModel):
     target_role: str
     level: str = "MID"
 
+class JobRoleCreate(BaseModel):
+    title: str
+    level: str = "MID"
+    required_skills: str  # comma-separated
+
+class InviteCreate(BaseModel):
+    target_role: str
+    level: str = "MID"
+    candidate_email: Optional[str] = None
+
 class SkillGap(BaseModel):
     skill: str
     current: float
