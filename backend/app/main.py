@@ -14,7 +14,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NaviKarier API", version="0.2.0")
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+# strip(): spasi setelah koma di env var bikin origin tak pernah match.
+origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
