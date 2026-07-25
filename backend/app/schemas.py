@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel
-from typing import Optional
+
 
 class UserRegister(BaseModel):
     name: str
@@ -26,11 +27,11 @@ class TokenResponse(BaseModel):
     user: UserResponse
 
 class ProfileUpdate(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
-    bio: Optional[str] = None
-    target_role: Optional[str] = None
-    experience_level: Optional[str] = None
+    name: str | None = None
+    phone: str | None = None
+    bio: str | None = None
+    target_role: str | None = None
+    experience_level: str | None = None
 
 class PasswordChange(BaseModel):
     old_password: str
@@ -62,7 +63,7 @@ class JobRoleCreate(BaseModel):
 class InviteCreate(BaseModel):
     target_role: str
     level: str = "MID"
-    candidate_email: Optional[str] = None
+    candidate_email: str | None = None
 
 class SkillGap(BaseModel):
     skill: str
@@ -79,7 +80,7 @@ class AnalysisResponse(BaseModel):
     skills: list[SkillGap]
     missing_skills: list[str]
     recommended_courses: list[str]
-    created_at: Optional[str] = None
+    created_at: str | None = None
 
 class DashboardOverview(BaseModel):
     match_score: float

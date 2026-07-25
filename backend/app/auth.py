@@ -1,13 +1,14 @@
+import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-from jose import JWTError, jwt
+
 import bcrypt
 from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from .database import get_db
+
 from . import models
-import os
+from .database import get_db
 
 SECRET_KEY = os.getenv("JWT_SECRET", "navikarier-dev-jwt-secret-change-in-production")
 ALGORITHM = "HS256"
@@ -21,7 +22,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS))
     to_encode.update({"exp": expire})

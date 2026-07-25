@@ -1,0 +1,7 @@
+# Lint config. Rules ignored below are deliberate FastAPI patterns, not defects:
+#   B008  — Depends()/File()/Body()/Header() in parameter defaults IS the FastAPI
+#           dependency-injection idiom; flagging it is a known false positive.
+#   BLE001 — a few `except Exception` are intentional graceful fallbacks
+#           (e.g. AI analysis -> rule-based) that must not crash the request.
+[lint]
+ignore = ["B008", "BLE001"]
