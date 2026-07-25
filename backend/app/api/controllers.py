@@ -432,7 +432,7 @@ def get_company_talent(db: Session):
 # ============ Job Roles (company defines competency requirements) ============
 
 def _job_role_dict(role: models.JobRole, db: Session):
-    # ponytail: match = candidates whose target_role string == this title.
+    # Match = candidates whose target_role string equals this title.
     # Swap for skill-overlap scoring when a stricter match is needed.
     match_count = (
         db.query(models.AnalysisResult)
