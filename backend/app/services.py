@@ -1,7 +1,8 @@
-import os
 import logging
+import os
+from typing import Any
+
 import PyPDF2
-from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -380,7 +381,7 @@ def _simulate_cv_scores(cv_text: str, skills: list) -> list:
     return results
 
 
-def _analyze_gap_hardcoded(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
+def _analyze_gap_hardcoded(cv_text: str, target_role: str, level: str = "MID") -> dict[str, Any]:
     # 15 role preset frontend punya entry sendiri; default Software Engineer
     # hanya kepakai sebagai safety net untuk role custom yang diketik manual.
     role_skills = ROLE_SKILL_MAP.get(target_role, ROLE_SKILL_MAP.get("Software Engineer"))
@@ -407,7 +408,7 @@ def _analyze_gap_hardcoded(cv_text: str, target_role: str, level: str = "MID") -
     }
 
 
-def analyze_gap_with_llm(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
+def analyze_gap_with_llm(cv_text: str, target_role: str, level: str = "MID") -> dict[str, Any]:
     if os.getenv("ANTHROPIC_API_KEY"):
         try:
             from .ai_service import analyze_cv_with_claude

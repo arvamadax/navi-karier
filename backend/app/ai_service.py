@@ -1,10 +1,10 @@
-import os
 import json
-import time
 import logging
-from typing import Dict, Any
+import os
+import time
+from typing import Any
 
-from .skkni_reference import get_skkni_reference, format_reference_standard
+from .skkni_reference import format_reference_standard, get_skkni_reference
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ Panduan:
 - HANYA output JSON, tanpa teks lain"""
 
 
-def analyze_cv_with_claude(cv_text: str, target_role: str, level: str = "MID") -> Dict[str, Any]:
+def analyze_cv_with_claude(cv_text: str, target_role: str, level: str = "MID") -> dict[str, Any]:
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY not set")
@@ -84,8 +84,7 @@ Berikan analisis gap skill dalam format JSON sesuai instruksi."""
             raw = response.content[0].text.strip()
             if raw.startswith("```"):
                 raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-                if raw.endswith("```"):
-                    raw = raw[:-3]
+                raw = raw.removesuffix("```")
                 raw = raw.strip()
 
             result = json.loads(raw)
@@ -106,7 +105,7 @@ Berikan analisis gap skill dalam format JSON sesuai instruksi."""
             time.sleep(delay)
 
     if not isinstance(result.get("match_score"), (int, float)):
-        raise ValueError("Invalid match_score")
+        raise TypeError("Invalid match_score")
     if not isinstance(result.get("skills"), list) or len(result["skills"]) == 0:
         raise ValueError("Invalid skills array")
 

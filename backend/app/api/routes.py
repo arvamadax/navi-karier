@@ -1,10 +1,32 @@
 import os
-from fastapi import APIRouter, UploadFile, File, Form, Body, Header, Depends, HTTPException
+
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    UploadFile,
+)
 from sqlalchemy.orm import Session
-from ..database import get_db
-from ..auth import get_current_user, require_role
-from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest, JobRoleCreate, InviteCreate
+
 from .. import models
+from ..auth import get_current_user, require_role
+from ..database import get_db
+from ..schemas import (
+    AnalyzeRequest,
+    ContactRequest,
+    ForgotPasswordRequest,
+    InviteCreate,
+    JobRoleCreate,
+    PasswordChange,
+    ProfileUpdate,
+    ResetPasswordRequest,
+    UserLogin,
+    UserRegister,
+)
 from . import controllers
 
 router = APIRouter()

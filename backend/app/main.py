@@ -1,11 +1,14 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from fastapi import FastAPI  # noqa: E402
-from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-from .database import engine, Base  # noqa: E402
-from .api.routes import router as api_router  # noqa: E402
-import os  # noqa: E402
+import os
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .api.routes import router as api_router
+from .database import Base, engine
 
 Base.metadata.create_all(bind=engine)
 
@@ -29,6 +32,7 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     from sqlalchemy import text
+
     from .database import SessionLocal
     try:
         db = SessionLocal()
