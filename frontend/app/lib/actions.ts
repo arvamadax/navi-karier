@@ -28,6 +28,10 @@ export async function logoutAction() {
   await signOut({ redirectTo: '/login' });
 }
 
+export async function googleLoginAction() {
+  await signIn('google', { redirectTo: '/dashboard' });
+}
+
 export async function registerAction(formData: FormData) {
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;

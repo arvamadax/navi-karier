@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+import os
+from fastapi import APIRouter, UploadFile, File, Form, Body, Header, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..auth import get_current_user, require_role
-from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest
+from ..schemas import UserRegister, UserLogin, AnalyzeRequest, ProfileUpdate, PasswordChange, ForgotPasswordRequest, ResetPasswordRequest, ContactRequest, JobRoleCreate, InviteCreate
 from .. import models
 from . import controllers
 
@@ -112,3 +113,45 @@ def company_overview(user: models.User = Depends(require_role("COMPANY", "ADMIN"
 @router.get("/company/talent")
 def company_talent(user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
     return controllers.get_company_talent(db)
+
+# --- Company: Job Roles ---
+@router.post("/company/roles")
+def create_role(payload: JobRoleCreate, user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.create_job_role(payload, user, db)
+
+@router.get("/company/roles")
+def list_roles(user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.list_job_roles(user, db)
+
+@router.delete("/company/roles/{role_id}")
+def delete_role(role_id: int, user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.delete_job_role(role_id, user, db)
+
+# --- Company: Invites ---
+@router.post("/company/invites")
+def create_invite(payload: InviteCreate, user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.create_invite(payload, user, db)
+
+@router.get("/company/invites")
+def list_invites(user: models.User = Depends(require_role("COMPANY", "ADMIN")), db: Session = Depends(get_db)):
+    return controllers.list_invites(user, db)
+
+# --- Public: Invite assessment (no auth; token is the credential) ---
+@router.get("/invite/{token}")
+def get_invite(token: str, db: Session = Depends(get_db)):
+    return controllers.get_invite_public(token, db)
+
+@router.post("/invite/{token}/submit")
+def submit_invite(token: str, name: str = Form(...), file: UploadFile = File(...), db: Session = Depends(get_db)):
+    return controllers.submit_invite_assessment(token, name, file, db)
+
+# --- OAuth bridge (called server-side by NextAuth; shared-secret guarded) ---
+@router.post("/auth/oauth")
+def oauth(payload: dict = Body(...), x_oauth_secret: str = Header(default=""), db: Session = Depends(get_db)):
+    expected = os.getenv("OAUTH_BRIDGE_SECRET", "navikarier-oauth-bridge-dev")
+    if x_oauth_secret != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    email = payload.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="email required")
+    return controllers.oauth_login(email, payload.get("name", ""), db)

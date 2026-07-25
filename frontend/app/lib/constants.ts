@@ -63,7 +63,7 @@ export const COMPANY_NAV: NavSection[] = [
   {
     title: 'Account',
     items: [
-      { label: 'Settings', href: '/dashboard/company/settings', icon: Settings },
+      { label: 'Settings', href: '/dashboard/settings', icon: Settings },
     ],
   },
 ];

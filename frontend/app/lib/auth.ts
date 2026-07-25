@@ -45,8 +45,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      // Google sign-in: bridge to a backend user + JWT so dashboard API calls work.
+      if (account?.provider === 'google' && user?.email) {
+        try {
+          const data = await apiFetch<LoginResponse>('/auth/oauth', {
+            method: 'POST',
+            headers: { 'x-oauth-secret': process.env.OAUTH_BRIDGE_SECRET || 'navikarier-oauth-bridge-dev' },
+            body: JSON.stringify({ email: user.email, name: user.name }),
+          });
+          token.accessToken = data.access_token;
+          token.role = data.user.role as UserRole;
+          token.id = String(data.user.id);
+        } catch {
+          token.role = 'JOBSEEKER';
+        }
+      } else if (user) {
         token.role = (user as { role: UserRole }).role ?? 'JOBSEEKER';
         token.id = user.id;
         token.accessToken = (user as { accessToken?: string }).accessToken;
