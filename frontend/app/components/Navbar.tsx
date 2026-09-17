@@ -16,6 +16,7 @@ export default function Navbar() {
         </Link>
         <nav>
           <ul className="nav-links">
+            <li><Link href="/about">Tentang Kami</Link></li>
             <li><Link href="/#features">Fitur</Link></li>
             <li><Link href="/#demo">Demo</Link></li>
             <li><Link href="/#dampak">Dampak</Link></li>
@@ -36,6 +37,7 @@ export default function Navbar() {
         </button>
       </div>
       <div className={`nav-drawer${open ? ' open' : ''}`}>
+        <Link href="/about" onClick={() => setOpen(false)}>Tentang Kami</Link>
         <Link href="/#features" onClick={() => setOpen(false)}>Fitur</Link>
         <Link href="/#demo" onClick={() => setOpen(false)}>Demo</Link>
         <Link href="/#dampak" onClick={() => setOpen(false)}>Dampak</Link>

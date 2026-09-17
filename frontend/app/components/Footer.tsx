@@ -25,8 +25,8 @@ export default function Footer() {
           <div className="footer-col">
             <h5>Perusahaan</h5>
             <ul>
-              <li><Link href="/#dampak">Dampak</Link></li>
               <li><Link href="/about">Tentang Kami</Link></li>
+              <li><Link href="/#dampak">Dampak</Link></li>
               <li><Link href="/blog">Blog</Link></li>
               <li><Link href="/contact">Kontak</Link></li>
               <li><Link href="/faq">FAQ</Link></li>
@@ -35,8 +35,8 @@ export default function Footer() {
           <div className="footer-col">
             <h5>Legal</h5>
             <ul>
-              <li><a href="#">Privasi</a></li>
-              <li><a href="#">Ketentuan</a></li>
+              <li><Link href="/privasi">Privasi</Link></li>
+              <li><Link href="/ketentuan">Ketentuan</Link></li>
             </ul>
           </div>
         </div>
