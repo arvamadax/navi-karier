@@ -1,0 +1,46 @@
+{
+  "src": "docs/src",
+  "out": "docs/assets/md",
+  "docs": {
+    "README.md": "README.md",
+    "backend-README.md": "backend/README.md",
+    "frontend-README.md": "frontend/README.md",
+    "backend-rs-README.md": "backend-rs/README.md"
+  },
+  "width": 1280,
+  "padding": 56,
+  "radius": 24,
+  "colors": {
+    "ink": "#f4f4f5",
+    "paper": "#09090b",
+    "muted": "#a1a1aa",
+    "line": "#27272a",
+    "accent": "#E11D48",
+    "accent_text": "#60a5fa",
+    "card": "#111113",
+    "row_alt": "#18181b",
+    "code_bg": "#000000",
+    "code_text": "#e4e4e7",
+    "code_comment": "#8b8b95"
+  },
+  "fonts": {
+    "sans": {
+      "family": "Inter",
+      "file": "brand/fonts/Inter-latin.woff2",
+      "weight": "400 700"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "file": "brand/fonts/JetBrainsMono-latin.woff2"
+    }
+  },
+  "metrics": {
+    "sans": 0.55,
+    "sans_bold": 0.58,
+    "mono": 0.6
+  },
+  "logo": {
+    "svg": "<g transform=\"translate(0 2.4) scale(0.02899)\"><path fill=\"{accent}\" d=\"M122 62h155l400 553 70-414-70-17L873 0l93 246-75-13-91 567H645L246 246l-25 154H67zM41 553h154l-41 247H0z\"/></g>",
+    "wordmark": "NaviKarier"
+  }
+}

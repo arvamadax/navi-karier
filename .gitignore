@@ -57,10 +57,5 @@ Thumbs.db
 # Coverage
 coverage/
 
-# Local dev tooling & editor state (not public)
-CLAUDE.md
-.claudeignore
-.claude/
-
 # Misc
 *.pem
