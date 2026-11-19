@@ -56,5 +56,14 @@ services:
     depends_on:
       - backend
 
+  # Deck presentasi statis, hostname sendiri (terpisah dari app utama). Tidak butuh DB atau secret.
+  presentasi:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8192:80"
+    volumes:
+      - ../presentasi:/usr/share/nginx/html:ro
+
 volumes:
   pgdata:

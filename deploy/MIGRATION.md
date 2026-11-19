@@ -99,6 +99,28 @@ tail -f ~/navikarier-deploy.log
 
 Alur kerja: merge PR ke `main` → CI hijau → ±2–5 menit kemudian live. `deploy/.env` hanya ada di server dan tidak pernah di-commit.
 
-## 8. Penutupan
+## 8. Domain presentasi (terpisah dari app)
+
+Deck presentasi (`presentasi/`, HTML + CSS statis) jalan sebagai service `presentasi` di compose yang sama, hostname sendiri, tanpa menyentuh app utama.
+
+| Hostname | Ke | Port lokal |
+|---|---|---|
+| `presentasi-navikarier.mkxapp.tech` | presentasi | 127.0.0.1:8192 |
+
+Sama seperti langkah 2: di Cloudflare DNS buat CNAME (Proxied) `presentasi-navikarier` ke `8c8682b9-79e8-417f-b4ad-60c6590edaa2.cfargotunnel.com`, lalu tambah ingress ini SEBELUM `- service: http_status:404` di `/etc/cloudflared/config.yml`:
+
+```yaml
+  - hostname: presentasi-navikarier.mkxapp.tech
+    service: http://127.0.0.1:8192
+```
+
+```bash
+sudo systemctl restart cloudflared
+curl -sI https://presentasi-navikarier.mkxapp.tech | head -1
+```
+
+Setelah service ini ada di `origin/main`, `auto-deploy.sh` ikut menyalakannya lewat `compose up -d --build`. Pintasan keyboard: panah pindah slide, `N` catatan presenter, `F` layar penuh, `L` ganti tema.
+
+## 9. Penutupan
 
 Setelah semuanya lolos uji, matikan layanan hosting lama dan biarkan DB lama dalam keadaan pause 1–2 minggu sebelum dihapus.
