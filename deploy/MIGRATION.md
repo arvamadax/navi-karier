@@ -13,8 +13,7 @@ Sumber lama: Vercel (frontend), Render (backend), Postgres di Render/Supabase.
 ```bash
 ssh home-server-cf
 git clone https://github.com/arvamadax/navi-karier ~/navi-karier
-cd ~/navi-karier && git switch chore/homeserver-deploy   # sampai di-merge ke main
-cd deploy && cp .env.example .env && chmod 600 .env
+cd ~/navi-karier/deploy && cp .env.example .env && chmod 600 .env
 nano .env     # isi secret LAMA dari Render/Vercel; POSTGRES_PASSWORD baru
 ```
 
@@ -87,6 +86,19 @@ chmod +x backup.sh && ./backup.sh && ls -lh backups
 
 Backup masih satu disk dengan DB. Salin `backups/` ke tempat lain secara berkala.
 
-## 7. Penutupan
+## 7. CI/CD otomatis
+
+- **CI**: `.github/workflows/ci.yml` jalan di setiap push/PR ke `main` (lint + build frontend, lint backend, validasi dan build image Docker).
+- **CD**: `auto-deploy.sh` jalan dari cron di server tiap 2 menit. Jika `origin/main` berubah dan semua check CI commit itu hijau, ia `git merge --ff-only`, `docker compose up -d --build`, lalu cek health. Gagal health check → rollback ke commit sebelumnya. Tidak ada port masuk atau secret di GitHub.
+
+```bash
+chmod +x auto-deploy.sh
+(crontab -l 2>/dev/null; echo "*/2 * * * * $HOME/navi-karier/deploy/auto-deploy.sh >> $HOME/navikarier-deploy.log 2>&1") | crontab -
+tail -f ~/navikarier-deploy.log
+```
+
+Alur kerja: merge PR ke `main` → CI hijau → ±2–5 menit kemudian live. `deploy/.env` hanya ada di server dan tidak pernah di-commit.
+
+## 8. Penutupan
 
 Setelah semuanya lolos uji, biarkan Vercel/Render/DB lama dalam keadaan pause 1–2 minggu sebelum dihapus.

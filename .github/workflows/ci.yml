@@ -44,3 +44,22 @@ jobs:
       - run: pip install ruff
       - run: ruff check app/
       - run: python -c "from app.main import app; print('Backend import OK')"
+
+  docker:
+    name: Docker — Compose & Build
+    runs-on: ubuntu-latest
+    # nilai dummy: hanya untuk memvalidasi compose dan membangun image produksi
+    env:
+      POSTGRES_PASSWORD: ci
+      JWT_SECRET: ci
+      OAUTH_BRIDGE_SECRET: ci
+      AUTH_SECRET: ci
+      FRONTEND_URL: http://localhost:3000
+      API_URL: http://localhost:8000
+    defaults:
+      run:
+        working-directory: deploy
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f docker-compose.prod.yml config -q
+      - run: docker compose -f docker-compose.prod.yml build
