@@ -96,7 +96,7 @@ Langkah lengkap ada di `deploy/MIGRATION.md`.
 |---|---|
 | Arva Mada Jayastu | Project Lead, Frontend Developer |
 | Farrel Arzaqia Mecca | Backend Developer, AI Integration |
-| Fairuz Zata Amani | Business Analyst, Documentation |
+| Fristian Boas Nathaniel | Business Analyst, Documentation |
 
 ## Lisensi
 

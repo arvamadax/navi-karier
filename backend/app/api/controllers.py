@@ -1,7 +1,7 @@
 import json
 import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, UploadFile
 from jose import JWTError
@@ -244,7 +244,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session):
         {
             "sub": str(user.id),
             "purpose": "reset_password",
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
         },
         SECRET_KEY,
         algorithm=ALGORITHM,

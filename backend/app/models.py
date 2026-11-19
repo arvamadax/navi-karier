@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
@@ -18,7 +18,7 @@ class User(Base):
     bio = Column(Text, nullable=True)
     target_role = Column(String, nullable=True)
     experience_level = Column(String, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     cv_data = relationship("CVData", back_populates="owner")
     analysis_results = relationship("AnalysisResult", back_populates="user")
@@ -29,7 +29,7 @@ class CVData(Base):
     id = Column(Integer, primary_key=True, index=True)
     extracted_text = Column(Text)
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     owner = relationship("User", back_populates="cv_data")
 
@@ -44,7 +44,7 @@ class AnalysisResult(Base):
     skill_details = Column(Text)
     recommended_courses = Column(Text)
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     user = relationship("User", back_populates="analysis_results")
 
@@ -56,7 +56,7 @@ class JobRole(Base):
     title = Column(String)
     level = Column(String, default="MID")
     required_skills = Column(Text)  # comma-separated
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
 class Invite(Base):
     __tablename__ = "invites"
@@ -69,4 +69,4 @@ class Invite(Base):
     candidate_email = Column(String, nullable=True)
     candidate_name = Column(String, nullable=True)
     status = Column(String, default="PENDING")  # PENDING | COMPLETED
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
