@@ -2,10 +2,10 @@
 
 <a id="navikarier-backend"></a>
 <p align="center"><img src="../docs/assets/md/backend-readme-01.svg" alt="NaviKarier Backend" width="100%"></p>
-<p align="center"><sub><a href="../README.md">Beranda repo</a> · <a href="../backend-rs/README.md">Port Rust</a></sub></p>
+<p align="center"><sub><a href="../README.md">Beranda repo</a> · <a href="../frontend/README.md">Frontend</a></sub></p>
 
 <a id="stack"></a>
-<p align="center"><img src="../docs/assets/md/backend-readme-02.svg" alt="Stack: FastAPI sebagai web framework. SQLAlchemy sebagai ORM, Alembic untuk migrasi. Pydantic untuk validasi. PyPDF2 untuk membaca teks CV, Anthropic API untuk analisis. SQLite (dev) dan PostgreSQL (produksi)." width="100%"></p>
+<p align="center"><img src="../docs/assets/md/backend-readme-02.svg" alt="Stack: Axum 0.8 dan Tokio untuk server HTTP. sqlx untuk PostgreSQL. Skema dibuat otomatis saat start dari src/schema.sql (idempoten). jsonwebtoken dan bcrypt untuk autentikasi. lopdf dengan porting extract_text PyPDF2 di src/pdf.rs untuk membaca teks CV. reqwest (rustls) untuk Anthropic API dan Resend. Image Docker akhir berbasis scratch: hanya satu binary, berjalan sebagai user non-root." width="100%"></p>
 
 <a id="struktur"></a>
 <p align="center"><img src="../docs/assets/md/backend-readme-03.svg" alt="Struktur" width="100%"></p>
@@ -13,40 +13,51 @@
 
 ```bash
 backend/
-├── app/
-│   ├── main.py         entrypoint FastAPI (mount /api)
-│   ├── database.py     engine SQLAlchemy dan Base
-│   ├── models.py       model ORM
-│   ├── schemas.py      skema Pydantic
-│   ├── auth.py         utilitas JWT
-│   ├── ai_service.py   integrasi AI
-│   ├── services.py     logika bisnis dan analisis fallback
-│   └── api/            router dan controller
-├── alembic/            migrasi database
-├── requirements.txt
-└── .env.example
+├── src/
+│   ├── main.rs        entrypoint, koneksi DB, skema saat start
+│   ├── lib.rs         konfigurasi dan router
+│   ├── handlers.rs    seluruh endpoint
+│   ├── auth.rs        JWT dan bcrypt
+│   ├── analysis.rs    analisis gap, fallback rule-based, panggilan Anthropic
+│   ├── pdf.rs         ekstraksi teks PDF
+│   ├── email.rs       pengiriman email (Resend)
+│   ├── validate.rs    validasi request
+│   ├── db.rs          tipe baris tabel
+│   └── schema.sql     DDL tabel
+├── data/              tabel statis (peta kursus, encoding PDF)
+├── Dockerfile
+└── Cargo.toml
 ```
 
 </details>
 
-<a id="setup"></a>
-<p align="center"><img src="../docs/assets/md/backend-readme-04.svg" alt="Setup: Dokumentasi API interaktif ada di http://localhost:8000/docs." width="100%"></p>
+<a id="endpoint"></a>
+<p align="center"><img src="../docs/assets/md/backend-readme-04.svg" alt="Endpoint: # Method dan path Auth 1 GET / - 2 GET /api/health -" width="100%"></p>
+
+<a id="menjalankan"></a>
+<p align="center"><img src="../docs/assets/md/backend-readme-05.svg" alt="Menjalankan: Variabel Fungsi DATABASE_URL URL PostgreSQL (wajib) JWT_SECRET, OAUTH_BRIDGE_SECRET rahasia token dan jembatan login Google" width="100%"></p>
 <details><summary>Copy the commands</summary>
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env            # Windows: copy .env.example .env
-python -m alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+export DATABASE_URL=postgres://navi:navi_dev@localhost:5432/navikarier
+export JWT_SECRET=ganti-ini
+cargo run --release
 ```
 
 </details>
 
-<a id="api"></a>
-<p align="center"><img src="../docs/assets/md/backend-readme-05.svg" alt="API: GET /api/health memeriksa API dan koneksi database. /api/auth/ mencakup register, login, profil, password, lupa password, dan OAuth. /api/upload-cv, /api/analyze-gap, /api/recommendations/{id} untuk alur analisis. /api/dashboard/, /api/admin/, /api/company/, /api/invite/ untuk dashboard, admin, dan perusahaan. Daftar lengkap ada di app/api/routes.py." width="100%"></p>
+<a id="uji-dan-build"></a>
+<p align="center"><img src="../docs/assets/md/backend-readme-06.svg" alt="Uji dan build" width="100%"></p>
+<details><summary>Copy the commands</summary>
 
-<a id="produksi"></a>
-<p align="center"><img src="../docs/assets/md/backend-readme-06.svg" alt="Produksi: Image dibangun dari Dockerfile ini. Saat start, container menjalankan alembic upgrade head lalu uvicorn di port 8000. Konfigurasi produksi ada di ../deploy/." width="100%"></p>
+```bash
+cargo test
+cargo build --release
+docker build -t navikarier-backend .
+```
+
+</details>
+
+<a id="catatan"></a>
+<p align="center"><img src="../docs/assets/md/backend-readme-07.svg" alt="Catatan: Backend ini menggantikan versi Python (FastAPI). Bentuk respons, urutan kunci JSON, dan pesan error dipertahankan sama supaya frontend tidak berubah. Kode Python terakhir ada di tag git python-backend-final. Ekstraksi PDF mengikuti PyPDF2 3.0.1 karena skor fallback bergantung pada panjang teks. Belum teruji untuk PDF hasil scan, terenkripsi, atau xref rusak. Zona waktu Postgres sebaiknya UTC: Rust selalu menulis UTC ke kolom timestamp. Tidak di-port: /docs, /redoc, /openapi.json bawaan FastAPI." width="100%"></p>

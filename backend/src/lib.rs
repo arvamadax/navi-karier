@@ -1,5 +1,5 @@
-//! NaviKarier backend, Rust port of `backend/` (FastAPI). Same routes, JSON, status codes
-//! and Postgres schema; schema stays owned by Alembic.
+//! Backend NaviKarier (Rust). Rute, bentuk JSON, status code, dan skema Postgres identik dengan
+//! backend Python lama (tag git `python-backend-final`). Skema dibuat saat start dari `schema.sql`.
 
 pub mod analysis;
 pub mod auth;

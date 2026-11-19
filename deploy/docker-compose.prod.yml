@@ -23,8 +23,7 @@ services:
     ports:
       - "127.0.0.1:8191:8000"
     environment:
-      # driver eksplisit: SQLAlchemy 2.1 menganggap postgresql:// sebagai psycopg v3, image hanya punya psycopg2
-      DATABASE_URL: postgresql+psycopg2://navi:${POSTGRES_PASSWORD}@db:5432/navikarier
+      DATABASE_URL: postgres://navi:${POSTGRES_PASSWORD}@db:5432/navikarier
       CORS_ORIGINS: ${FRONTEND_URL:?}
       FRONTEND_URL: ${FRONTEND_URL}
       APP_ENV: production

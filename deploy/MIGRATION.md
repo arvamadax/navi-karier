@@ -1,7 +1,7 @@
 # Migrasi NaviKarier → home-server
 
 Target: semua jalan di `arva-home-server` (Docker + tunnel Cloudflare yang sudah ada).
-Sumber lama: Vercel (frontend), Render (backend), Postgres di Render/Supabase.
+Sumber lama: layanan hosting online (frontend dan backend) dengan Postgres di Supabase. Setelah migrasi tidak ada lagi ketergantungan ke layanan tersebut.
 
 | Hostname | Ke | Port lokal |
 |---|---|---|
@@ -14,7 +14,7 @@ Sumber lama: Vercel (frontend), Render (backend), Postgres di Render/Supabase.
 ssh home-server-cf
 git clone https://github.com/arvamadax/navi-karier ~/navi-karier
 cd ~/navi-karier/deploy && cp .env.example .env && chmod 600 .env
-nano .env     # isi secret LAMA dari Render/Vercel; POSTGRES_PASSWORD baru
+nano .env     # semua secret baru dan acak (openssl rand -hex 32); user cukup login ulang
 ```
 
 ## 2. Tunnel + DNS
@@ -42,13 +42,13 @@ sudo systemctl restart cloudflared
 
 ## 3. Pindahkan DB
 
-Jalankan dari `~/navi-karier/deploy`. Untuk dump FINAL, pause service backend di Render dulu supaya tidak ada tulisan baru.
+Jalankan dari `~/navi-karier/deploy`. Untuk dump FINAL, hentikan backend lama dulu supaya tidak ada tulisan baru. Backend Rust membuat skema sendiri saat start, jadi cukup salin DATA ke tabel yang sudah ada.
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d db
 read -rs OLD_URL        # tempel DATABASE_URL lama, Enter (tidak tampil)
 # Supabase: pakai koneksi langsung (5432) atau session pooler, BUKAN transaction pooler (6543); tambah ?sslmode=require
-docker run --rm postgres:17-alpine pg_dump "$OLD_URL" --no-owner --no-acl --schema=public \
+docker run --rm postgres:17-alpine pg_dump "$OLD_URL" --data-only --no-owner --no-acl \n  -t users -t cv_data -t analysis_results -t job_roles -t invites \
   | docker compose -f docker-compose.prod.yml exec -T db psql -U navi -d navikarier -v ON_ERROR_STOP=1
 ```
 
@@ -88,7 +88,7 @@ Backup masih satu disk dengan DB. Salin `backups/` ke tempat lain secara berkala
 
 ## 7. CI/CD otomatis
 
-- **CI**: `.github/workflows/ci.yml` jalan di setiap push/PR ke `main` (lint + build frontend, lint backend, validasi dan build image Docker).
+- **CI**: `.github/workflows/ci.yml` jalan di setiap push/PR ke `main` (lint + build frontend, tes + build backend Rust, validasi dan build image Docker).
 - **CD**: `auto-deploy.sh` jalan dari cron di server tiap 2 menit. Jika `origin/main` berubah dan semua check CI commit itu hijau, ia `git merge --ff-only`, `docker compose up -d --build`, lalu cek health. Gagal health check → rollback ke commit sebelumnya. Tidak ada port masuk atau secret di GitHub.
 
 ```bash
@@ -101,4 +101,4 @@ Alur kerja: merge PR ke `main` → CI hijau → ±2–5 menit kemudian live. `de
 
 ## 8. Penutupan
 
-Setelah semuanya lolos uji, biarkan Vercel/Render/DB lama dalam keadaan pause 1–2 minggu sebelum dihapus.
+Setelah semuanya lolos uji, matikan layanan hosting lama dan biarkan DB lama dalam keadaan pause 1–2 minggu sebelum dihapus.

@@ -30,6 +30,23 @@ async fn main() {
         .connect_lazy(&url)
         .expect("invalid DATABASE_URL");
 
+    // Skema dibuat sendiri saat start (idempoten); retry karena DB bisa masih menyala.
+    let mut attempt = 0;
+    loop {
+        match sqlx::raw_sql(include_str!("schema.sql")).execute(&pool).await {
+            Ok(_) => break,
+            Err(e) if attempt < 30 => {
+                attempt += 1;
+                eprintln!("schema belum bisa dijalankan ({e}); coba lagi {attempt}/30");
+                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            }
+            Err(e) => {
+                eprintln!("schema gagal: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     let state = AppState::new(pool, Config::from_env());
     let addr = format!(
         "{}:{}",

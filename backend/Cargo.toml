@@ -2,7 +2,7 @@
 name = "navikarier-backend"
 version = "0.2.0"
 edition = "2021"
-description = "Drop-in Rust port of the NaviKarier FastAPI backend (backend/)"
+description = "Backend NaviKarier (Axum + sqlx)"
 
 [lib]
 name = "navikarier"

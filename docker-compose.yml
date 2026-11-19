@@ -15,7 +15,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://navi:navi_dev@db:5432/navikarier
+      DATABASE_URL: postgres://navi:navi_dev@db:5432/navikarier
       CORS_ORIGINS: http://localhost:3000
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       APP_ENV: development

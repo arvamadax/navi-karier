@@ -27,21 +27,18 @@ NaviKarier adalah **Skill Gap Advisor**: ia memberi tahu pencari kerja kompetens
 | Lapisan | Teknologi |
 |---|---|
 | Frontend | Next.js 14 App Router, TypeScript, React 18 |
-| Backend | Python 3.11, FastAPI, SQLAlchemy, Pydantic |
-| Backend alternatif | Rust, Axum, sqlx (`backend-rs/`, lihat README-nya) |
+| Backend | Rust, Axum, sqlx |
 | AI | Anthropic API, dengan fallback rule-based |
 | Auth | NextAuth.js v5 (Credentials dan Google OAuth) |
-| Parsing CV | PyPDF2 |
-| Database | SQLite (dev), PostgreSQL 17 (produksi) |
-| Migrasi | Alembic |
+| Parsing CV | lopdf, ekstraksi setara PyPDF2 |
+| Database | PostgreSQL 17 (skema dibuat saat start) |
 | Infrastruktur | Docker Compose, Cloudflare Tunnel, GitHub Actions |
 
 ## Struktur repo
 
 ```
 navi-karier/
-├── backend/        FastAPI: API, model, layanan AI, migrasi Alembic
-├── backend-rs/     Port Rust dari backend (setara, belum dipakai produksi)
+├── backend/        Rust (Axum): API, analisis, parsing PDF, skema DB
 ├── frontend/       Next.js: landing, auth, dashboard
 ├── deploy/         Compose produksi, backup, auto-deploy, runbook
 ├── brand/          Logo dan font untuk README
@@ -51,13 +48,11 @@ navi-karier/
 ## Menjalankan lokal
 
 ```bash
-# backend
+# database dan backend
+docker compose up -d db
 cd backend
-python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-python -m alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+export DATABASE_URL=postgres://navi:navi_dev@localhost:5432/navikarier
+cargo run --release
 ```
 
 ```bash
@@ -68,13 +63,13 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Backend di `http://localhost:8000` (dokumentasi API di `/docs`), frontend di `http://localhost:3000`. Tanpa `ANTHROPIC_API_KEY`, analisis memakai fallback rule-based.
+Backend di `http://localhost:8000`, frontend di `http://localhost:3000`. Tanpa `ANTHROPIC_API_KEY`, analisis memakai fallback rule-based.
 
 ## Variabel lingkungan
 
 | Berkas | Variabel |
 |---|---|
-| `backend/.env` | `DATABASE_URL`, `CORS_ORIGINS`, `ANTHROPIC_API_KEY` (opsional), `JWT_SECRET`, `APP_ENV` |
+| `backend` (env proses) | `DATABASE_URL`, `CORS_ORIGINS`, `JWT_SECRET`, `ANTHROPIC_API_KEY` (opsional), lihat `backend/README.md` |
 | `frontend/.env.local` | `NEXT_PUBLIC_API_BASE_URL`, `AUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | `deploy/.env` | lihat `deploy/.env.example` (hanya di server, tidak pernah di-commit) |
 
@@ -82,7 +77,7 @@ Backend di `http://localhost:8000` (dokumentasi API di `/docs`), frontend di `ht
 
 Produksi berjalan di home-server dengan Docker Compose, diekspos lewat Cloudflare Tunnel: frontend di `navikarier.mkxapp.tech`, API di `api-navikarier.mkxapp.tech`.
 
-- **CI**: setiap push dan PR ke `main` menjalankan lint, build frontend, import check backend, serta validasi dan build image Docker.
+- **CI**: setiap push dan PR ke `main` menjalankan build frontend, tes dan build backend Rust, serta validasi dan build image Docker.
 - **CD**: server menarik `main` tiap 2 menit. Jika CI commit itu hijau, ia build ulang, cek health, dan rollback otomatis bila gagal.
 - **Backup**: dump Postgres harian, simpan 14 hari.
 

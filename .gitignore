@@ -51,9 +51,6 @@ deploy/backups/
 .DS_Store
 Thumbs.db
 
-# Vercel
-.vercel
-
 # Coverage
 coverage/
 

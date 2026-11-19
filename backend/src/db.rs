@@ -1,5 +1,4 @@
-//! Row types for the tables owned by Alembic / `backend/app/models.py`.
-//! Rust never creates or alters schema; it only reads and writes rows.
+//! Row types untuk tabel di `schema.sql` (dibuat saat start).
 
 use time::{OffsetDateTime, PrimitiveDateTime};
 use serde_json::Value;
