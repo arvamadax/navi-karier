@@ -22,7 +22,7 @@ use crate::{
     email,
     error::{validation_item, ApiError, ApiResult},
     pdf, pyjson,
-    validate::{self, def, json_body, missing_body_field, model, opt, path_int, req, Ty},
+    validate::{def, json_body, missing_body_field, model, opt, path_int, req, Ty},
     AppState,
 };
 
@@ -170,7 +170,11 @@ pub async fn read_root() -> Json<Value> {
 }
 
 pub async fn health_check(State(st): State<AppState>) -> Json<Value> {
-    let ok = sqlx::query("SELECT 1").execute(&st.pool).await.is_ok();
+    let res = sqlx::query("SELECT 1").execute(&st.pool).await;
+    if let Err(e) = &res {
+        eprintln!("[health] database error: {e}");
+    }
+    let ok = res.is_ok();
     Json(json!({"status": "ok", "database": if ok { "ok" } else { "error" }, "version": "2.0.0"}))
 }
 
@@ -491,12 +495,12 @@ fn top_roles_json(c: &Counter) -> Vec<Value> {
 }
 
 async fn all_analysis_scores(st: &AppState) -> ApiResult<Vec<(Option<i32>, Option<String>, Option<f64>)>> {
-    Ok(sqlx::query_as("SELECT user_id, target_role, match_score FROM analysis_results ORDER BY id").fetch_all(&st.pool).await?)
+    Ok(sqlx::query_as("SELECT user_id, target_role, match_score FROM analysis_results").fetch_all(&st.pool).await?)
 }
 
 pub async fn admin_overview(State(st): State<AppState>, headers: HeaderMap) -> R {
     require_role(&st, &headers, &["ADMIN"]).await?;
-    let users = sqlx::query_as::<_, User>(&format!("SELECT {USER_COLS} FROM users ORDER BY id")).fetch_all(&st.pool).await?;
+    let users = sqlx::query_as::<_, User>(&format!("SELECT {USER_COLS} FROM users")).fetch_all(&st.pool).await?;
     let analyses = all_analysis_scores(&st).await?;
     let cv_count: i64 = sqlx::query_scalar("SELECT count(*) FROM cv_data").fetch_one(&st.pool).await?;
 
@@ -558,7 +562,7 @@ pub async fn company_overview(State(st): State<AppState>, headers: HeaderMap) ->
     require_role(&st, &headers, &["COMPANY", "ADMIN"]).await?;
     let analyses = all_analysis_scores(&st).await?;
     let details: Vec<Option<String>> =
-        sqlx::query_scalar("SELECT skill_details FROM analysis_results ORDER BY id").fetch_all(&st.pool).await?;
+        sqlx::query_scalar("SELECT skill_details FROM analysis_results").fetch_all(&st.pool).await?;
     let candidates: HashSet<Option<i32>> = analyses.iter().map(|a| a.0).collect();
     let scores: Vec<f64> = analyses.iter().filter_map(|a| a.2).collect();
     let mut demand = Counter::default();
@@ -577,7 +581,7 @@ pub async fn company_overview(State(st): State<AppState>, headers: HeaderMap) ->
 
 pub async fn company_talent(State(st): State<AppState>, headers: HeaderMap) -> R {
     require_role(&st, &headers, &["COMPANY", "ADMIN"]).await?;
-    let rows = sqlx::query_as::<_, (i32, Option<String>, Option<String>, Option<String>, Option<f64>, Option<String>, Option<chrono::NaiveDateTime>)>(
+    let rows = sqlx::query_as::<_, (i32, Option<String>, Option<String>, Option<String>, Option<f64>, Option<String>, Option<time::PrimitiveDateTime>)>(
         "SELECT a.id, u.name, a.target_role, a.level, a.match_score, a.missing_skills, a.created_at \
          FROM analysis_results a JOIN users u ON a.user_id = u.id ORDER BY a.match_score DESC",
     )
@@ -731,7 +735,8 @@ pub async fn get_invite(State(st): State<AppState>, Path(token): Path<String>) -
 pub async fn submit_invite(State(st): State<AppState>, Path(token): Path<String>, mp: Result<Multipart, MultipartRejection>) -> R {
     let form = read_form(mp).await?;
     let mut errors = vec![];
-    if !form.fields.contains_key("name") {
+    // Starlette/FastAPI: an empty form value counts as missing for a required `Form(...)`.
+    if form.fields.get("name").is_none_or(|v| v.is_empty()) {
         errors.push(missing_body_field("name"));
     }
     if form.file.is_none() {

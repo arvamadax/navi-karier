@@ -59,7 +59,7 @@ mod tests {
         // python: json.dumps([{"skill": "Café ☕ 😀", "current": 55, "gap": 20.5, "q": "a\"b\\c\n\x7f"}])
         assert_eq!(
             dumps(&v),
-            r#"[{"skill": "Café ☕ 😀", "current": 55, "gap": 20.5, "q": "a\"b\\c\n\u007f"}]"#
+            "[{\"skill\": \"Caf\x5Cu00e9 \x5Cu2615 \x5Cud83d\x5Cude00\", \"current\": 55, \"gap\": 20.5, \"q\": \"a\\\"b\\\\c\\n\x5Cu007f\"}]"
         );
         assert_eq!(dumps(&json!([])), "[]");
     }

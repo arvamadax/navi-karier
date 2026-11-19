@@ -43,9 +43,9 @@ enum Operand {
     Num(f64),
     Int(i64),
     Name(String),
-    /// TextStringObject: bytes decodable as PDFDocEncoding / UTF-16 (used verbatim by PyPDF2).
+    /// TextStringObject: only the synthetic " " PyPDF2 inserts for wide TJ gaps (used verbatim).
     Text(String),
-    /// ByteStringObject: goes through the font encoding.
+    /// ByteStringObject: every string read from a content stream; goes through the font encoding.
     Bytes(Vec<u8>),
     Array(Vec<Operand>),
     Other,
@@ -68,24 +68,11 @@ fn is_delim(b: u8) -> bool {
     is_ws(b) || matches!(b, b'(' | b')' | b'<' | b'>' | b'[' | b']' | b'{' | b'}' | b'/' | b'%')
 }
 
-/// `create_string_object(bytes)`
+/// `create_string_object(bytes, forced_encoding="bytes")`: PyPDF2 parses page and XObject content
+/// streams with `forced_encoding="bytes"`, so every operand string is a ByteStringObject and always
+/// goes through the font encoding (never the PDFDocEncoding shortcut).
 fn make_string(bytes: Vec<u8>) -> Operand {
-    if bytes.starts_with(&[0xFE, 0xFF]) {
-        let units: Vec<u16> = bytes[2..].chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
-        if bytes.len() % 2 == 0 {
-            return Operand::Text(char::decode_utf16(units).map(|r| r.unwrap_or('\u{FFFD}')).collect());
-        }
-        return Operand::Bytes(bytes);
-    }
-    let mut out = String::new();
-    for &b in &bytes {
-        let c = &TABLES.pdfdoc[b as usize];
-        if c == "\u{0}" {
-            return Operand::Bytes(bytes);
-        }
-        out.push_str(c);
-    }
-    Operand::Text(out)
+    Operand::Bytes(bytes)
 }
 
 struct Lexer<'a> {

@@ -19,8 +19,9 @@ tower-http = { version = "0.6", features = ["cors"] }
 serde = { version = "1", features = ["derive"] }
 # preserve_order: FastAPI keeps dict insertion order; JSON key order must match.
 serde_json = { version = "1", features = ["preserve_order"] }
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "chrono", "macros"] }
-chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "time", "macros"] }
+# `time`, not chrono: sqlx's chrono feature produced binaries that crash pre-main when linked with zig on Windows.
+time = { version = "0.3", default-features = false, features = ["std"] }
 # rust_crypto = pure Rust (no ring/C compiler), so it also builds on Windows dev boxes without a C toolchain.
 jsonwebtoken = { version = "10", default-features = false, features = ["rust_crypto"] }
 bcrypt = "0.17"

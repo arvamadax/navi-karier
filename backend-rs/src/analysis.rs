@@ -174,9 +174,11 @@ enum CallError {
 }
 
 async fn call_claude_once(st: &AppState, key: &str, user_message: &str) -> Result<Value, CallError> {
+    // Same override the Anthropic SDK honours (also lets the test harness point both backends at a mock).
+    let base = std::env::var("ANTHROPIC_BASE_URL").unwrap_or_else(|_| "https://api.anthropic.com".into());
     let resp = st
         .http
-        .post("https://api.anthropic.com/v1/messages")
+        .post(format!("{}/v1/messages", base.trim_end_matches('/')))
         .header("x-api-key", key)
         .header("anthropic-version", "2023-06-01")
         .json(&json!({

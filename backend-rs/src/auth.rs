@@ -13,7 +13,7 @@ use crate::{
 pub const ACCESS_TOKEN_EXPIRE_HOURS: i64 = 24;
 
 pub fn now_ts() -> i64 {
-    chrono::Utc::now().timestamp()
+    time::OffsetDateTime::now_utc().unix_timestamp()
 }
 
 pub fn encode_claims(secret: &str, claims: &Value) -> String {

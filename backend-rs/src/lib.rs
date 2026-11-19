@@ -79,12 +79,15 @@ async fn method_not_allowed() -> (StatusCode, Json<serde_json::Value>) {
 pub fn router(state: AppState) -> Router {
     use handlers::*;
 
-    // allow_credentials + "*" is rejected by CORS; mirroring the request is what Starlette does.
+    // allow_credentials + "*" is rejected by CORS: list Starlette's methods, mirror the request headers.
     let origins: Vec<HeaderValue> = state.cfg.cors_origins.iter().filter_map(|o| o.parse().ok()).collect();
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::list(origins))
         .allow_credentials(true)
-        .allow_methods(AllowMethods::mirror_request())
+        .allow_methods(AllowMethods::list(
+            ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "QUERY"]
+                .map(|m| axum::http::Method::from_bytes(m.as_bytes()).unwrap()),
+        ))
         .allow_headers(AllowHeaders::mirror_request())
         .max_age(Duration::from_secs(600));
 

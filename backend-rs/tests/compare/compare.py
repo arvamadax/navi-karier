@@ -15,7 +15,9 @@
 * Exit code 1 if any response differs.
 """
 import argparse
+import http.server
 import json
+import threading
 import os
 import re
 import subprocess
@@ -31,6 +33,7 @@ BACKEND = ROOT / "backend"
 SECRET = "compare-jwt-secret"
 OAUTH = "compare-oauth-secret"
 PY_PORT, RS_PORT = 18001, 18002
+PY_AI_PORT, RS_AI_PORT, MOCK_PORT = 18004, 18005, 18003
 ENV_COMMON = {
     "JWT_SECRET": SECRET,
     "OAUTH_BRIDGE_SECRET": OAUTH,
@@ -74,7 +77,7 @@ def norm(v, ns, key=None):
             return "<ts>"
         v = re.sub(r"/invite/[A-Za-z0-9_-]+", "/invite/<token>", v)
         v = re.sub(r"guest\+[A-Za-z0-9_-]+@", "guest+<token>@", v)
-        return v.replace(f".{ns}.test", ".NS.test").replace(f"-{ns}", "-NS")
+        return v if ns is None else v.replace(f".{ns}.test", ".NS.test").replace(f"-{ns}", "-NS")
     return v
 
 
@@ -99,18 +102,20 @@ class Harness:
     def __init__(self, py, rs):
         self.py, self.rs, self.diffs, self.total = py, rs, [], 0
 
-    def both(self, label, fn):
+    def both(self, label, fn, shared=False):
         """fn(backend) -> (status, body); executed on Python then Rust, compared after masking."""
         self.total += 1
         a, b = fn(self.py), fn(self.rs)
-        na, nb = (a[0], norm(a[1], self.py.ns)), (b[0], norm(b[1], self.rs.ns))
+        # shared=True: platform-wide data contains both namespaces, so don't fold either one.
+        na = (a[0], norm(a[1], None if shared else self.py.ns))
+        nb = (b[0], norm(b[1], None if shared else self.rs.ns))
         ok = na == nb
         print(f"{'OK  ' if ok else 'DIFF'} {label}: py={a[0]} rs={b[0]}")
         if not ok:
             self.diffs.append((label, a, b))
         return a, b
 
-    def req(self, label, method, path, token=None, **kw):
+    def req(self, label, method, path, token=None, shared=False, **kw):
         def fn(be):
             k = dict(kw)
             for key in ("json", "data", "files"):
@@ -118,7 +123,7 @@ class Harness:
                     k[key] = k[key](be)
             return be.call(method, path(be) if callable(path) else path, token=token, **k)
 
-        return self.both(label, fn)
+        return self.both(label, fn, shared=shared)
 
 
 # ---------------------------------------------------------------------------- PDFs
@@ -178,20 +183,34 @@ def make_pdfs(d: Path) -> list[Path]:
     c.save()
     out.append(p)
     # Browser-generated (Skia / Type0 Identity-H: the typical "Save as PDF" CV)
-    edge = next((x for x in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    import glob
+    edge = next((x for x in (*glob.glob(r"C:\Program Files (x86)\Microsoft\EdgeCore\*\msedge.exe"),
+                             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
                              r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
                              r"C:\Program Files\Google\Chrome\Application\chrome.exe") if Path(x).exists()), None)
     if edge:
-        html = d / "cv.html"
-        html.write_text("<html><body style='font-family:Arial'><h1>Siti Rahma</h1><p>Data Analyst - Bandung</p>"
-                        "<ul><li>SQL, Python, Excel, Tableau</li><li>Statistik &amp; Machine Learning</li></ul>"
-                        "<table><tr><td>Bahasa</td><td>Indonesia, English</td></tr></table>"
-                        "<p>Café résumé naïve — “kutipan”</p></body></html>", encoding="utf-8")
-        pdf = d / "browser_print.pdf"
-        subprocess.run([edge, "--headless", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={pdf}", html.as_uri()],
-                       capture_output=True, timeout=60)
-        if pdf.exists():
-            out.append(pdf)
+        long_para = " ".join(f"Kalimat {i} tentang pengalaman SQL, Python dan Docker di perusahaan teknologi." for i in range(60))
+        pages = {
+            "browser_print": "<h1>Siti Rahma</h1><p>Data Analyst - Bandung</p><ul><li>SQL, Python, Excel, Tableau</li>"
+                             "<li>Statistik &amp; Machine Learning</li></ul><table><tr><td>Bahasa</td><td>Indonesia, English</td></tr></table>"
+                             "<p>Café résumé naïve — “kutipan”</p>",
+            "browser_two_column": "<div style='display:flex'><div style='width:30%;background:#eee'><h3>Kontak</h3><p>siti@example.com</p>"
+                                  "<h3>Skill</h3><p>Python<br>SQL<br>Docker</p></div><div style='width:70%'><h2>Pengalaman</h2>"
+                                  "<p><b>Data Analyst</b> — PT Maju (2020–2024)</p><ul><li>Membangun dashboard</li><li>Optimasi query</li></ul></div></div>",
+            "browser_long_3pages": f"<h1>Riwayat</h1><p style='text-align:justify'>{long_para}</p><h2>Proyek</h2><p style='text-align:justify'>{long_para}</p>",
+            "browser_unicode": "<p>日本語のテキスト 中文 한국어</p><p dir='rtl'>مرحبا بالعالم</p><p>Emoji 😀 ✓ ★ © ® ™ € £</p><p>ﬁ ligature ﬂ</p>",
+            "browser_links_tables": "<p><a href='https://example.com'>Portofolio</a> | <a href='mailto:a@b.c'>a@b.c</a></p>"
+                                    "<table border=1><tr><th>Skill</th><th>Level</th></tr><tr><td>SQL</td><td>5</td></tr><tr><td>Python</td><td>4</td></tr></table>"
+                                    "<h6>tiny heading</h6><p style='font-size:7px'>Small print 7px text here</p><p style='letter-spacing:3px'>S P A C E D</p>",
+        }
+        for name, body in pages.items():
+            html = d / f"{name}.html"
+            html.write_text(f"<html><head><meta charset='utf-8'></head><body style='font-family:Arial'>{body}</body></html>", encoding="utf-8")
+            pdf = d / f"{name}.pdf"
+            subprocess.run([edge, "--headless", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={pdf}", html.as_uri()],
+                           capture_output=True, timeout=60)
+            if pdf.exists():
+                out.append(pdf)
     (d / "garbage.pdf").write_bytes(b"%PDF-1.4\nthis is not a real pdf")
     out.append(d / "garbage.pdf")
     return out
@@ -323,6 +342,7 @@ def run(h: Harness, db_dsn: str, pdfs: list[Path]):
 
     first = next(iter(cv_ids), None)
     cv_of = lambda be: cv_ids[first][be.ns]  # noqa: E731
+    h.cv_of = cv_of
     h.req("analyze unknown cv -> 404", "POST", "/api/analyze-gap", token="seeker", json={"cv_id": 99999999, "target_role": "Data Analyst"})
     h.req("analyze invalid body -> 422", "POST", "/api/analyze-gap", token="seeker", json={"cv_id": "abc", "target_role": 1})
     for role, level in (("Data Analyst", "MID"), ("Software Engineer", "senior"), ("Cybersecurity Analyst", "JUNIOR"), ("Custom Role", "MID")):
@@ -385,11 +405,11 @@ def run(h: Harness, db_dsn: str, pdfs: list[Path]):
     h.req("GET /company/invites after", "GET", "/api/company/invites", token="company")
 
     # --- global (platform-wide) endpoints: py then rs back to back, no writes in between
-    h.req("GET /admin/overview", "GET", "/api/admin/overview", token="admin")
-    h.req("GET /admin/users", "GET", "/api/admin/users", token="admin")
-    h.req("GET /company/overview", "GET", "/api/company/overview", token="company")
-    h.req("GET /company/talent", "GET", "/api/company/talent", token="company")
-    h.req("GET /company/overview as admin", "GET", "/api/company/overview", token="admin")
+    h.req("GET /admin/overview", "GET", "/api/admin/overview", token="admin", shared=True)
+    h.req("GET /admin/users", "GET", "/api/admin/users", token="admin", shared=True)
+    h.req("GET /company/overview", "GET", "/api/company/overview", token="company", shared=True)
+    h.req("GET /company/talent", "GET", "/api/company/talent", token="company", shared=True)
+    h.req("GET /company/overview as admin", "GET", "/api/company/overview", token="admin", shared=True)
 
     # --- CORS
     for label, method, hdrs in (
@@ -403,12 +423,81 @@ def run(h: Harness, db_dsn: str, pdfs: list[Path]):
         b = requests.request(method, f"{rs.base}/api/health", headers=hdrs)
         keys = ["access-control-allow-origin", "access-control-allow-credentials", "access-control-allow-methods",
                 "access-control-allow-headers", "access-control-max-age"]
-        ha = {k: a.headers.get(k) for k in keys}
-        hb = {k: b.headers.get(k) for k in keys}
+        # "A, B" and "A,B" are the same header value list
+        canon = lambda v: None if v is None else ",".join(x.strip() for x in v.split(","))  # noqa: E731
+        ha = {k: canon(a.headers.get(k)) for k in keys}
+        hb = {k: canon(b.headers.get(k)) for k in keys}
         ok = a.status_code == b.status_code and ha == hb
         print(f"{'OK  ' if ok else 'DIFF'} {label}: py={a.status_code} rs={b.status_code}")
         if not ok:
             h.diffs.append((label, (a.status_code, ha), (b.status_code, hb)))
+
+
+# ---------------------------------------------------------------------------- Anthropic mock
+
+class Mock(http.server.BaseHTTPRequestHandler):
+    mode = "ok"
+    calls = 0
+
+    def log_message(self, *a):
+        pass
+
+    def do_POST(self):
+        self.rfile.read(int(self.headers.get("content-length", 0)))
+        Mock.calls += 1
+        mode = Mock.mode
+        if mode == "http400":
+            return self._send(400, {"type": "error", "error": {"type": "invalid_request_error", "message": "nope"}})
+        if mode == "empty_content":
+            return self._send(200, {"id": "m", "type": "message", "role": "assistant", "content": [], "model": "x",
+                                    "stop_reason": "end_turn", "usage": {"input_tokens": 1, "output_tokens": 1}})
+        if mode == "bad_json_then_ok" and Mock.calls == 1:
+            text = "Maaf, ini bukan JSON"
+        elif mode == "bad_skill_value":
+            text = json.dumps({"match_score": 50, "skills": [{"skill": "SQL", "current": "abc", "required": 70}]})
+        elif mode == "not_object":
+            text = "[1, 2, 3]"
+        else:
+            body = {
+                "match_score": 123.456 if mode == "score_over_100" else 61.25,
+                "skills": [
+                    {"skill": "SQL", "current": "55.0".split(".")[0], "required": 120, "gap": 999, "priority": "BOGUS", "note": "extra"},
+                    {"skill": "Python", "current": 40.9, "required": 75},
+                    {"skill": "Docker", "current": -5, "required": 60, "gap": 0, "priority": "LOW"},
+                    {"skill": "Kubernetes", "current": 70, "required": 72},
+                    {"skill": "Café ☕", "required": 50},
+                ],
+                "missing_skills": ["ignored"],
+                "recommended_courses": [f"Course {i}" for i in range(12)],
+                "reference_standard": "model-made-up regulation",
+            }
+            text = json.dumps(body, ensure_ascii=False)
+            if mode in ("ok", "bad_json_then_ok", "score_over_100"):
+                text = "```json\n" + text + "\n```"
+        self._send(200, {"id": "m", "type": "message", "role": "assistant", "model": "x", "stop_reason": "end_turn",
+                         "content": [{"type": "text", "text": text}], "usage": {"input_tokens": 1, "output_tokens": 1}})
+
+    def _send(self, code, obj):
+        raw = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("content-type", "application/json")
+        self.send_header("content-length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
+
+def run_ai(h: Harness, cv_of):
+    print("\n--- Claude path (mock Anthropic server; retries use the real 1s/2s backoff) ---")
+    for mode in ("ok", "score_over_100", "bad_json_then_ok", "bad_skill_value", "not_object", "empty_content", "http400"):
+        def fn(be, mode=mode):
+            Mock.mode, Mock.calls = mode, 0
+            r = be.call("POST", "/api/analyze-gap", token="seeker",
+                        json={"cv_id": cv_of(be), "target_role": "Software Engineer", "level": "MID"})
+            r[1]["_mock_calls"] = Mock.calls if isinstance(r[1], dict) else None
+            return r
+        h.both(f"analyze-gap with Claude mock: {mode}", fn)
+    # persisted skill_details must also be identical (the DB is shared by both backends)
+    h.req("recommendations after AI analysis", "GET", lambda be: f"/api/recommendations/{be.ids['analysis']}", token="seeker")
 
 
 def main():
@@ -430,6 +519,9 @@ def main():
     admin.autocommit = True
     dbname = f"navi_compare_{int(time.time())}"
     admin.cursor().execute(f'create database "{dbname}"')
+    # The postgres docker image runs in UTC. psycopg2 sends tz-aware datetimes, which Postgres converts
+    # to the *session* TimeZone when storing into `timestamp`; Rust always writes UTC. Match prod:
+    admin.cursor().execute(f"alter database \"{dbname}\" set timezone to 'UTC'")
     base = admin_url.rsplit("/", 1)[0]
     dsn = f"{base}/{dbname}".replace("postgresql+psycopg2://", "postgresql://")
     env_db = {"DATABASE_URL": sqlalchemy_url(dsn)}
@@ -452,6 +544,24 @@ def main():
             pdfs = make_pdfs(Path(d))
             h = Harness(Backend("py", PY_PORT), Backend("rs", RS_PORT))
             run(h, dsn, pdfs)
+
+            # Phase 2: same DB and tokens, but both backends now have ANTHROPIC_API_KEY set and
+            # ANTHROPIC_BASE_URL pointing at the mock.
+            for p in procs[:]:
+                p.terminate()
+            ai_env = {"ANTHROPIC_API_KEY": "sk-ant-test", "ANTHROPIC_BASE_URL": f"http://127.0.0.1:{MOCK_PORT}"}
+            srv = http.server.ThreadingHTTPServer(("127.0.0.1", MOCK_PORT), Mock)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            py2 = subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--port", str(PY_AI_PORT)], cwd=BACKEND,
+                                   env={**os.environ, **ENV_COMMON, **env_db, **ai_env})
+            rs2 = subprocess.Popen([rust_bin], env={**os.environ, **ENV_COMMON, **ai_env, "DATABASE_URL": dsn,
+                                                     "PORT": str(RS_AI_PORT), "BIND": "127.0.0.1"})
+            procs.extend([py2, rs2])
+            wait_health(PY_AI_PORT, py2, "python backend (AI)")
+            wait_health(RS_AI_PORT, rs2, "rust backend (AI)")
+            h.py.base, h.rs.base = f"http://127.0.0.1:{PY_AI_PORT}", f"http://127.0.0.1:{RS_AI_PORT}"
+            run_ai(h, h.cv_of)
+            srv.shutdown()
 
         print(f"\n{h.total - len(h.diffs)}/{h.total} checks identical")
         for label, a, b in h.diffs:
