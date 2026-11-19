@@ -84,7 +84,13 @@ chmod +x backup.sh && ./backup.sh && ls -lh backups
 (crontab -l 2>/dev/null; echo "15 3 * * * $HOME/navi-karier/deploy/backup.sh >> $HOME/navi-karier/deploy/backups/cron.log 2>&1") | crontab -
 ```
 
-Backup masih satu disk dengan DB. Salin `backups/` ke tempat lain secara berkala.
+Backup di server masih satu disk dengan DB, jadi tarik juga ke mesin lain. `pull-backups.sh` membuat dump baru di server, menyalinnya lewat SSH, memeriksa keutuhan (`gzip -t`), dan menyimpan 30 terakhir:
+
+```bash
+bash deploy/pull-backups.sh ~/navikarier-backups
+```
+
+Di Windows, jadwalkan harian (Task Scheduler, jalankan juga jika terlewat): `bash.exe -lc "bash /d/Project/navi-karier/deploy/pull-backups.sh /d/Project/navikarier-backups"`.
 
 ## 7. CI/CD otomatis
 
@@ -101,7 +107,7 @@ Alur kerja: merge PR ke `main` → CI hijau → ±2–5 menit kemudian live. `de
 
 ## 8. Domain presentasi (terpisah dari app)
 
-Deck presentasi (`presentasi/`, HTML + CSS statis) jalan sebagai service `presentasi` di compose yang sama, hostname sendiri, tanpa menyentuh app utama.
+Pitching deck (`presentasi/`, HTML + CSS statis) jalan sebagai service `presentasi` di compose yang sama, hostname sendiri, tanpa menyentuh app utama.
 
 | Hostname | Ke | Port lokal |
 |---|---|---|

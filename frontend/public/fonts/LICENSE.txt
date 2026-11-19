@@ -1,0 +1,6 @@
+Inter        Copyright (c) The Inter Project Authors (https://github.com/rsms/inter)
+JetBrains Mono  Copyright (c) JetBrains s.r.o. (https://github.com/JetBrains/JetBrainsMono)
+
+Kedua font dilisensikan di bawah SIL Open Font License 1.1.
+Teks lengkap: https://openfontlicense.org/open-font-license-official-text/
+File di folder ini adalah subset Latin dari Google Fonts, dipakai untuk menyematkan font ke gambar README.

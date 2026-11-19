@@ -1,3 +1,7 @@
+/* Font dihosting sendiri (public/fonts), tanpa CDN pihak ketiga. Lisensi: SIL OFL 1.1. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/Inter-var-latin.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url('/fonts/JetBrainsMono-var-latin.woff2') format('woff2'); }
+
 :root {
   --bg: #000;
   --bg-2: #0a0a0a;
