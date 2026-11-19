@@ -35,6 +35,7 @@ htmlcov/
 .env
 .env.local
 .env.*.local
+deploy/backups/
 
 # Databases
 *.db

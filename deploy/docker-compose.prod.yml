@@ -1,0 +1,61 @@
+# Produksi home-server. Jalankan dari folder deploy/:  docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+# Port hanya di 127.0.0.1; tunnel Cloudflare yang sudah ada (systemd) meneruskan ke sini.
+name: navikarier
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: navi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?isi di .env}
+      POSTGRES_DB: navikarier
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U navi -d navikarier"]
+      interval: 5s
+      retries: 12
+
+  backend:
+    build: ../backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8191:8000"
+    environment:
+      # driver eksplisit: SQLAlchemy 2.1 menganggap postgresql:// sebagai psycopg v3, image hanya punya psycopg2
+      DATABASE_URL: postgresql+psycopg2://navi:${POSTGRES_PASSWORD}@db:5432/navikarier
+      CORS_ORIGINS: ${FRONTEND_URL:?}
+      FRONTEND_URL: ${FRONTEND_URL}
+      APP_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?}
+      OAUTH_BRIDGE_SECRET: ${OAUTH_BRIDGE_SECRET:?}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FROM_EMAIL: ${FROM_EMAIL:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${API_URL:?}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8190:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${API_URL}
+      NEXTAUTH_URL: ${FRONTEND_URL}
+      AUTH_SECRET: ${AUTH_SECRET:?}
+      OAUTH_BRIDGE_SECRET: ${OAUTH_BRIDGE_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
