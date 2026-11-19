@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'NaviKarier | Tentang Kami' };
 const team: { name: string; role: string; img: string | null }[] = [
   { name: 'Arva Mada Jayastu', role: 'Project Lead, Frontend Developer', img: '/assets/team-arva.jpg' },
   { name: 'Farrel Arzaqia Mecca', role: 'Backend Developer, AI Integration', img: '/assets/team-farrel.jpg' },
-  { name: 'Fristian Boas Nathaniel', role: 'Business Analyst, Documentation', img: null },
+  { name: 'Fristian Boas Nathaniel', role: 'Business Analyst, Documentation', img: '/assets/team-fristian.webp' },
 ];
 
 const initials = (name: string) => name.split(' ').slice(0, 2).map((w) => w[0]).join('');
